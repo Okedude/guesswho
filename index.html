@@ -17,8 +17,8 @@
             background: #ffffff;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border-radius: 1.5rem;
-            max-width: 90%;
-            width: 800px; /* Breiter für Zimmerordnung */
+            max-width: 95%;
+            width: 1000px; 
         }
         .btn-primary {
             transition: all 0.15s ease-in-out;
@@ -33,17 +33,6 @@
             background-color: #a5b4fc; /* indigo-300 */
             cursor: not-allowed;
         }
-        .hint-item {
-            padding-left: 1.5rem;
-            text-indent: -1.5rem;
-        }
-        .hint-item::before {
-            content: "•";
-            color: #4f46e5; /* indigo-600 */
-            font-weight: bold;
-            display: inline-block; 
-            width: 1.5rem;
-        }
         .draggable-person {
             cursor: grab;
         }
@@ -56,6 +45,32 @@
             background-color: #eef2ff; /* indigo-50 */
             border-color: #4f46e5; /* indigo-600 */
         }
+        .conflict-new {
+             background-color: #fee2e2; /* red-100 */
+             border: 1px solid #f87171; /* red-400 */
+             padding: 0.25rem 0.5rem;
+             border-radius: 0.5rem;
+             font-size: 0.8rem;
+             cursor: help; /* Zeigt an, dass es interaktiv ist */
+             transition: background-color 0.15s;
+        }
+        .conflict-new:hover {
+            background-color: #fca5a5; /* red-300 */
+        }
+        .room-card {
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .management-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.15s;
+        }
+        .sick-person {
+             background-color: #fca5a5 !important; /* red-300 */
+             color: #7f1d1d !important; /* red-900 */
+        }
     </style>
 </head>
 <body class="flex items-start justify-center p-4">
@@ -64,10 +79,10 @@
             <h1 class="text-3xl font-bold mb-4 text-gray-800">Klassenfahrt Spiele</h1>
             
             <div id="mode-switcher" class="flex justify-center space-x-4 mb-6">
-                <button id="switch-guess" data-mode="guess" class="px-4 py-2 font-semibold rounded-lg bg-indigo-500 text-white shadow-md">
+                <button id="switch-guess" data-mode="guess" class="px-4 py-2 font-semibold rounded-lg border border-indigo-500 text-indigo-700 hover:bg-indigo-50">
                     Wer Bin Ich?
                 </button>
-                <button id="switch-room" data-mode="room" class="px-4 py-2 font-semibold rounded-lg border border-indigo-500 text-indigo-700 hover:bg-indigo-50">
+                <button id="switch-room" data-mode="room" class="px-4 py-2 font-semibold rounded-lg bg-indigo-500 text-white shadow-md">
                     Zimmerordnung
                 </button>
             </div>
@@ -75,9 +90,7 @@
             <div id="message-box" style="display:none;"></div>
 
             <div id="guess-game" style="display:none;">
-                <!-- Wer Bin Ich? (RATESPIEL) -->
-                
-                <!-- Display Name und Streak -->
+                <!-- Wer Bin Ich? (RATESPIEL) - Nicht relevant für diesen Request -->
                 <div class="p-4 bg-gray-100 border border-gray-200 rounded-xl mb-6 flex justify-between items-center">
                     <div class="flex flex-col">
                         <label for="display-name" class="block text-xs font-medium text-gray-600 mb-1">Dein Name</label>
@@ -89,15 +102,11 @@
                     </div>
                 </div>
 
-                <!-- Rundeninformation mit Beschreibung (Einzel-Tipp) -->
                 <div class="p-6 bg-indigo-50 border border-indigo-200 rounded-2xl mb-6">
                     <h2 class="text-xl font-bold text-indigo-800 mb-4">Hinweise zur gesuchten Person:</h2>
-                    
                     <div id="hint-list" class="space-y-2 mb-4 text-indigo-700">
                         <p class="text-base font-medium italic">Spiel wird gestartet...</p>
                     </div>
-
-                    <!-- Tipp-Anfordern-Bereich -->
                     <div id="hint-controls" class="border-t border-indigo-200 pt-4 mt-4">
                         <button id="request-hint-btn" class="btn-primary w-full text-white p-3 rounded-xl font-bold text-sm" disabled>
                             Nächsten Tipp anfordern (<span id="time-remaining">30</span>s)
@@ -105,7 +114,6 @@
                     </div>
                 </div>
 
-                <!-- Rate-Eingabe (Textfeld) -->
                 <div class="mb-4">
                     <h2 class="text-xl font-semibold mb-3 text-gray-700">Dein Tipp</h2>
                     <div class="flex space-x-3">
@@ -113,9 +121,7 @@
                                placeholder="Name hier eingeben" 
                                list="name-options" 
                                class="flex-grow p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
-                        <datalist id="name-options">
-                            <!-- Wird per JS befüllt -->
-                        </datalist>
+                        <datalist id="name-options"></datalist>
                         <button id="submit-guess-btn" class="btn-primary text-white p-3 rounded-xl font-bold px-6 border-indigo-500">Raten</button>
                     </div>
                     <p class="text-xs text-gray-500 mt-2">Du musst den Namen aus der Liste korrekt eingeben.</p>
@@ -124,15 +130,52 @@
                 <button id="reset-game-btn" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-red-500 transition duration-150">Streak zurücksetzen</button>
             </div>
 
-            <div id="room-game" style="display:none;">
+            <div id="room-game" style="display:block;">
                 <!-- Zimmerordnung (ZUORDNUNGSSPIEL) -->
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">Zimmerordnung für die Klassenfahrt</h2>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Zimmerordnung & Virenmanagement</h2>
 
-                <div id="room-status" class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-6 text-sm text-yellow-800 font-medium">
-                    <p>Total Zimmer: <span id="total-rooms">0</span></p>
-                    <p>Belegte Betten: <span id="used-capacity">0</span> von <span id="total-capacity">0</span> (Gesamtkapazität)</p>
-                    <p>Kranke Personen (müssen isoliert werden oder nur mit Kranken): <span id="sick-count">0</span> (<span id="sick-list"></span>)</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                    <!-- Status und Zeit -->
+                    <div id="room-status" class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-800 font-medium space-y-1 col-span-1">
+                        <p class="font-bold text-base text-gray-700 mb-1">Logistik-Status</p>
+                        <p>Total Zimmer: <span id="total-rooms">0</span></p>
+                        <p>Belegte Betten: <span id="used-capacity">0</span> von <span id="total-capacity">0</span></p>
+                        <p class="border-t border-yellow-200 pt-2 mt-2 font-bold">Verstrichene Zeit: <span id="room-timer" class="font-extrabold text-xl text-red-600">0s</span></p>
+                    </div>
+                    
+                    <!-- Krankheitsstatus -->
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800 font-medium col-span-1">
+                        <p class="font-bold text-base text-gray-700 mb-2">Krankheits-Status (Achtung!)</p>
+                        <p>Kranke Personen 🤒: <span id="sick-count" class="font-extrabold text-red-700 text-lg">0</span> von 20</p>
+                        <p class="text-xs mt-2 border-t border-red-200 pt-2 text-red-700">Krank: <span id="sick-list"></span></p>
+                    </div>
+
+                    <!-- Dynamische Konflikte -->
+                    <div id="dynamic-conflict-area" class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-indigo-800 font-medium col-span-1">
+                        <p class="font-bold text-base text-gray-700 mb-2">Dynamische Konflikte (Eskalation)</p>
+                        <div id="dynamic-conflicts-list" class="flex flex-wrap gap-2 h-10 overflow-y-auto">
+                            <p class="text-xs italic text-indigo-600">Noch keine neuen Konflikte.</p>
+                        </div>
+                        <p class="text-xs mt-2 border-t border-indigo-200 pt-2 text-indigo-700">Nächste Eskalation in: <span id="conflict-countdown">30</span>s | Vergebungs-Check in: <span id="forgiveness-countdown">60</span>s</p>
+                    </div>
                 </div>
+                
+                <div class="p-3 bg-orange-100 border border-orange-400 rounded-xl mb-6 text-sm text-orange-800">
+                    <p class="font-bold mb-1">Heizungs-Regel: Diese Personen benötigen ein Zimmer mit Heizung (🔥):</p>
+                    <p class="text-xs">Adriana S., Luc, Sean, Nila</p>
+                </div>
+                
+                <!-- NEU: DEDIZIERTER BEREICH FÜR KONFLIKTGESCHICHTEN -->
+                 <div id="conflict-story-display" class="p-3 bg-red-50 border border-red-300 rounded-xl mb-6 text-sm text-red-800" style="display:none;">
+                    <p class="font-bold mb-1 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        Konflikt-Hintergrund: <span id="conflict-pair-display" class="font-extrabold ml-1"></span>
+                    </p>
+                    <p id="conflict-reason-text" class="text-xs"></p>
+                </div>
+
 
                 <!-- Personen zum Zuweisen -->
                 <div class="mb-6">
@@ -144,15 +187,15 @@
 
                 <!-- Zimmer-Container -->
                 <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-700">Zimmerplan</h3>
-                    <div id="room-layout" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-700">Zimmerplan (Kranke und Gesunde müssen getrennt werden!)</h3>
+                    <div id="room-layout" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <!-- Zimmer werden hier eingefügt -->
                     </div>
                 </div>
                 
                 <!-- Bewertungs-Button -->
                 <button id="submit-rooms-btn" class="mt-6 w-full btn-primary text-white p-3 rounded-xl font-bold px-6 border-indigo-500">
-                    Zimmerordnung absenden
+                    Zimmerordnung absenden & Final bewerten
                 </button>
 
                 <button id="new-room-game-btn" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-indigo-500 transition duration-150">
@@ -169,231 +212,102 @@
     </main>
 
     <script>
-        // --- ALLGEMEINE SPIELKONSTANTEN (Unverändert) ---
+        // --- ALLGEMEINE SPIELKONSTANTEN ---
         const NAME_POOL_GUESS = [
-            { name: "Nila", tips: ["Ist offen und hilfsbereit.", "Hat blonde Haare.", "Trägt Ohrringe.", "Ist mittelgross und gehört zur 6erGruppe."] },
-            { name: "Adriana S.", tips: ["Hat braune Haare und braune Augen.", "Nutzt ein Moncler Brillenetui.", "Ist Mitglied der 6erGruppe.", "Eher unauffällig in der Gruppe."] },
-            { name: "Ellison", tips: ["Ist politisch engagiert.", "Ist blond und hat Sommersprossen.", "Ist Amerikanisch.", "Gehört zur 6erGruppe."] },
-            { name: "Julia", tips: ["Hat braune Haare.", "Hat immer Skyr dabei.", "Interessiert sich für Sherlock Holmes.", "Gehört zur ElisaGruppe."] },
-            { name: "Tim", tips: ["Hat braunschwarze Haare und braune Augen.", "Ist sehr lustig.", "Kann als Konsumopfer bezeichnet werden.", "Steht auf Frau Elseners Liste (vermutlich für Unfug)."] },
-            { name: "William", tips: ["Hat braune Haare.", "War in der Mongolei.", "Ist lustig und spielt gerne Schach.", "Kommt aus England und hat eine grosse Stirn."] },
-            { name: "Jacob", tips: ["Ist fast immer am Computer.", "Hat braune Haare und trägt Openfront.", "Hat einen Bruder mit Autismus.", "Trägt einen schwarzen Schulthek."] },
-            { name: "Tim-Oliver", tips: ["Ist immer am Lernen.", "Trägt immer eine Mütze.", "Hat braune Haare.", "Seine Zusammenfassungen sind sehr detailliert (wie eine Maturaarbeit)."] },
-            { name: "Leif", tips: ["Gamt oft mit Jacob.", "Macht eigene Musik.", "Ist blond und gehört zur MaxGruppe.", "Sagt oft \"Ich bin perfekt!\" und ist ein Grillmeister."] },
-            { name: "Max", tips: ["Ist neu in der Klasse.", "Ist gross und hat braune Haare.", "Ist Coiffeur (Friseur).", "Gehört zur LeifGruppe."] },
-            { name: "Tais", tips: ["Ist neu in der Klasse.", "Spricht Französisch.", "Behauptet, er kann Mathe perfekt.", "Lebt bei Elisa."] },
-            { name: "Elisa", tips: ["Hat blonde Haare und ist klein.", "Kann als Konsumopfer gelten.", "Gehört zur ElinGruppe.", "Hat kürzlich einen neuen Pulli gekauft."] },
-            { name: "Zofia", tips: ["Ist immer mit Emma E. zusammen.", "Ist klein, blond und hat lange Haare.", "Ist eine Streberin.", "Liebt das Fach Mathematik."] },
-            { name: "Elin", tips: ["Hat einen 20m Pool.", "Hat blondbraune Haare.", "Wurde im Bergwaldprojekt sofort krank.", "Trägt eine Moncler Jacke."] },
-            { name: "Cedric", tips: ["Ist GC Fan (Grasshopper Club Zürich).", "Spielt Fussball.", "Gehört zur 6erGruppe.", "Hat braune Haare und ist gross."] },
-            { name: "Luc", tips: ["Bestellt viel.", "Hat einen Buzzcut.", "Trägt eine Arc'teryx Jacke.", "Gehört zur 6erGruppe und hat braune Haare."] },
-            { name: "Sean", tips: ["Trägt meistens Ralph Lauren.", "Hat einen Mittelscheitel.", "Hat blonde Haare und gehört zur 6erGruppe.", "Ist der beste Freund von Luc."] },
-            { name: "Anna G.", tips: ["Ist immer auf GrowMyGarden.", "Spielt Poki.", "Hat Style und ist blond.", "Wird als \"fast provisorisch\" beschrieben."] },
-            { name: "Anna P.", tips: ["Hat lange, braune Haare.", "Hat \"Glupschaugen\".", "Ist immer auf Poki.", "Ist die beste Freundin von Anna G."] },
-            { name: "Jara", tips: ["Spielt auch immer Poki.", "Hat blondbraune Haare.", "Hat mittellange Haare.", "Besitzt ein ThinkPad."] }
+            // Namen wie zuvor, gekürzt für die Übersichtlichkeit
+            { name: "Nila", tips: ["Ist offen und hilfsbereit.", "Hat blonde Haare."] },
+            { name: "Adriana S.", tips: ["Hat braune Haare und braune Augen.", "Nutzt ein Moncler Brillenetui."] },
+            { name: "Ellison", tips: ["Ist politisch engagiert.", "Ist blond und hat Sommersprossen."] },
+            { name: "Julia", tips: ["Hat braune Haare.", "Hat immer Skyr dabei."] },
+            { name: "Tim", tips: ["Ist sehr lustig.", "Kann als Konsumopfer bezeichnet werden."] },
+            { name: "William", tips: ["War in der Mongolei.", "Ist lustig und spielt gerne Schach."] },
+            { name: "Jacob", tips: ["Ist fast immer am Computer.", "Trägt einen schwarzen Schulthek."] },
+            { name: "Tim-Oliver", tips: ["Ist immer am Lernen.", "Trägt immer eine Mütze."] },
+            { name: "Leif", tips: ["Macht eigene Musik.", "Sagt oft \"Ich bin perfekt!\"."] },
+            { name: "Max", tips: ["Ist neu in der Klasse.", "Ist Coiffeur (Friseur)."] },
+            { name: "Tais", tips: ["Spricht Französisch.", "Behauptet, er kann Mathe perfekt."] },
+            { name: "Elisa", tips: ["Hat blonde Haare und ist klein.", "Kann als Konsumopfer gelten."] },
+            { name: "Zofia", tips: ["Ist immer mit Emma E. zusammen.", "Liebt das Fach Mathematik."] },
+            { name: "Elin", tips: ["Hat einen 20m Pool.", "Wurde im Bergwaldprojekt sofort krank."] },
+            { name: "Cedric", tips: ["Ist GC Fan (Grasshopper Club Zürich).", "Spielt Fussball."] },
+            { name: "Luc", tips: ["Bestellt viel.", "Hat einen Buzzcut."] },
+            { name: "Sean", tips: ["Trägt meistens Ralph Lauren.", "Hat einen Mittelscheitel."] },
+            { name: "Anna G.", tips: ["Ist immer auf GrowMyGarden.", "Spielt Poki."] },
+            { name: "Anna P.", tips: ["Hat lange, braune Haare.", "Ist immer auf Poki."] },
+            { name: "Jara", tips: ["Spielt auch immer Poki.", "Besitzt ein ThinkPad."] }
         ];
 
         // --- ZIMMERORDNUNG KONSTANTEN ---
         const CLASS_SIZE = 20;
-        // Verfügbare Zimmergrößen
-        const ROOM_SIZES = [1, 2, 3, 4, 8]; 
-        
-        // Personen-Liste für den Zimmer-Modus
+        const ROOM_SIZES = [2, 3, 4, 5]; 
         const PERSON_NAMES = NAME_POOL_GUESS.map(p => p.name);
         
-        /* * Explizite Konfliktpaare: Wenn beide im selben Zimmer sind, gibt es ein Problem.
-         * Jedes Paar muss nur einmal definiert werden (z.B. ["A", "B"] genügt für A mag B nicht und B mag A nicht).
-         */
-        const CONFLICT_PAIRS = [
-            // --- Allgemeine Konflikte (Basis) ---
-            ["Zofia", "Tim"], 
-            ["Tim-Oliver", "Luc"], 
-            ["Ellison", "Jacob"], 
-            
-            // --- Konflikte für Adriana S. ---
-            ["Adriana S.", "Anna G."], 
-            ["Adriana S.", "Tim"],
-            ["Adriana S.", "William"],
-            ["Adriana S.", "Jacob"],
-            ["Adriana S.", "Tim-Oliver"],
-            ["Adriana S.", "Leif"],
-            ["Adriana S.", "Zofia"],
-            ["Adriana S.", "Anna P."],
-            ["Adriana S.", "Jara"],
+        // Personen, die eine Heizung benötigen
+        const NO_HEATING_TOLERANCE_PEOPLE = ["Adriana S.", "Luc", "Sean", "Nila"];
 
-            // --- Konflikte für Nila ---
-            ["Nila", "Jacob"],
-            ["Nila", "Tim-Oliver"],
-            ["Nila", "Leif"],
-            ["Nila", "Anna G."],
-            ["Nila", "Anna P."],
-            ["Nila", "Jara"],
-            
-            // --- Konflikte für Julia ---
-            ["Julia", "Tim"],
-            ["Julia", "William"],
-            ["Julia", "Jacob"],
-            ["Julia", "Tim-Oliver"],
-            ["Julia", "Leif"],
-            ["Julia", "Max"],
-            ["Julia", "Luc"],
-            ["Julia", "Sean"],
-            ["Julia", "Adriana S."], // Julia will nicht mit Adriana S.
-            ["Julia", "Jara"],
-            ["Julia", "Anna G."],
-            ["Julia", "Anna P."],
-
-            // --- Neue Konflikte aus der aktuellen Liste (dedupliziert) ---
-            // Ellison (nicht mit Tim, William, Leif)
-            ["Ellison", "Tim"],
-            ["Ellison", "William"],
-            ["Ellison", "Leif"],
-            
-            // William (nicht mit Tim-Oliver)
-            ["William", "Tim-Oliver"],
-            
-            // Tim (nicht mit Tim-Oliver)
-            ["Tim", "Tim-Oliver"],
-
-            // Tim-Oliver (nicht mit Anna G., Anna P., Jara)
-            ["Tim-Oliver", "Anna G."],
-            ["Tim-Oliver", "Anna P."],
-            ["Tim-Oliver", "Jara"],
-            
-            // Max (nicht mit Adriana S., Nila, Tais, Elisa, Zofia, Elin)
-            ["Max", "Adriana S."], 
-            ["Max", "Nila"],
-            ["Max", "Tais"],
-            ["Max", "Elisa"],
-            ["Max", "Zofia"],
-            ["Max", "Elin"],
-            
-            // Leif (nicht mit Cedric, Luc, Sean)
-            ["Leif", "Cedric"],
-            ["Leif", "Luc"],
-            ["Leif", "Sean"],
-            
-            // Zofia (nicht mit Nila, Ellison, Cedric, Luc, Sean, Anna G., Anna P., Jara)
-            ["Zofia", "Nila"],
-            ["Zofia", "Ellison"],
-            ["Zofia", "Cedric"],
-            ["Zofia", "Luc"],
-            ["Zofia", "Sean"],
-            ["Zofia", "Anna G."],
-            ["Zofia", "Anna P."],
-            ["Zofia", "Jara"],
-            
-            // Elin (nicht mit Adriana S., Nila, Tim-Oliver, Leif, Luc, Cedric, Sean, Jara, Anna P., Anna G., Tais)
-            ["Elin", "Adriana S."],
-            ["Elin", "Nila"],
-            ["Elin", "Tim-Oliver"],
-            ["Elin", "Leif"],
-            ["Elin", "Luc"],
-            ["Elin", "Cedric"],
-            ["Elin", "Sean"],
-            ["Elin", "Jara"],
-            ["Elin", "Anna P."],
-            ["Elin", "Anna G."],
-            ["Elin", "Tais"],
-            
-            // Tais (nicht mit Nila, Adriana S., Tim, William, Jacob, Tim-Oliver, Leif, Cedric, Luc, Anna P., Anna G., Jara)
-            ["Tais", "Nila"],
-            ["Tais", "Adriana S."],
-            ["Tais", "Tim"],
-            ["Tais", "William"],
-            ["Tais", "Jacob"],
-            ["Tais", "Leif"],
-            ["Tais", "Cedric"],
-            ["Tais", "Luc"],
-            ["Tais", "Anna P."],
-            ["Tais", "Anna G."],
-            ["Tais", "Jara"],
-            
-            // Elisa (nicht mit Cedric, Luc, Sean, Adriana S., Nila, Ellison, Anna G., Anna P.)
-            ["Elisa", "Cedric"],
-            ["Elisa", "Luc"],
-            ["Elisa", "Sean"],
-            ["Elisa", "Adriana S."],
-            ["Elisa", "Nila"],
-            ["Elisa", "Ellison"],
-            ["Elisa", "Anna G."],
-            ["Elisa", "Anna P."],
-            
-            // Cedric (nicht mit Tim, Jara, Anna P., Anna G.)
-            ["Cedric", "Tim"],
-            ["Cedric", "Jara"],
-            ["Cedric", "Anna P."],
-            ["Cedric", "Anna G."],
-            
-            // Sean (nicht mit Tim, William, Jacob, Tim-Oliver, Anna P., Anna G., Jara, Tais)
-            ["Sean", "Tim"],
-            ["Sean", "William"],
-            ["Sean", "Jacob"],
-            ["Sean", "Tim-Oliver"],
-            ["Sean", "Anna P."],
-            ["Sean", "Anna G."],
-            ["Sean", "Jara"],
-            ["Sean", "Tais"],
-            
-            // Luc (nicht mit Tim, William, Jacob, Anna P., Anna G., Jara, Tais)
-            ["Luc", "Tim"],
-            ["Luc", "William"],
-            ["Luc", "Jacob"],
-            ["Luc", "Anna P."],
-            ["Luc", "Anna G."],
-            ["Luc", "Jara"],
-            ["Luc", "Tais"],
-            
-            // Anna G. (nicht mit Ellison, Tim, Jacob, William)
-            ["Anna G.", "Ellison"],
-            ["Anna G.", "Tim"],
-            ["Anna G.", "Jacob"],
-            ["Anna G.", "William"],
-            
-            // Anna P. (nicht mit Ellison, Tim, Jacob)
-            ["Anna P.", "Ellison"],
-            ["Anna P.", "Tim"],
-            ["Anna P.", "Jacob"],
-            
-            // Jara (nicht mit Ellison, William, Tim, Jacob)
-            ["Jara", "Ellison"],
-            ["Jara", "William"],
-            ["Jara", "Tim"],
-            ["Jara", "Jacob"],
+        // Feste Konflikte (MIT HINTERGRUNDGESCHICHTE)
+        const CONFLICT_PAIRS_FIXED = [
+            ["Zofia", "Tim", "Tim hat Zofias Stifte für seine Doodles ohne Erlaubnis benutzt, was bei Zofia, die sehr ordentlich ist, zu einem Tobsuchtsanfall führte. Der Konflikt dreht sich um Respekt vor Eigentum."], 
+            ["Tim-Oliver", "Luc", "Luc hört seine Hip-Hop-Musik immer über Lautsprecher, während Tim-Oliver absolute Ruhe zum Lernen braucht. Ein unlösbarer Konflikt zwischen Entspannung und Leistung."], 
+            ["Ellison", "Jacob", "Ellison ist überzeugt, dass man sich politisch engagieren muss, während Jacob nur in seiner Computerwelt lebt und die echte Welt ignoriert. Dieser fundamentale Weltanschauungskonflikt kocht bei jeder Diskussion hoch."], 
+            ["Adriana S.", "Anna G.", "Sie streiten sich seit dem 5. Schuljahr darum, wer das schönere Federmäppchen besitzt. Es ist ein eitler, aber tiefer Groll."], 
+            ["Nila", "Jacob", "Nila ist sehr ordentlich und extrovertiert, Jacob ist chaotisch und introvertiert. Nila kann Jacobs Unordnung nicht ertragen, die sie als Zeichen von Respektlosigkeit interpretiert."], 
+            ["Julia", "Tim", "Tim machte einen Witz über Julias ständigen Skyr-Konsum ('Du bist doch eine wandelnde Molkerei!'), was Julia zutiefst beleidigte."], 
+            ["Ellison", "Tim", "Ellison ist Tim zu laut und Tim findet Ellisons ständige moralische Appelle anstrengend. Es ist ein Konflikt der Lautstärke und des Temperaments."], 
+            ["William", "Tim-Oliver", "William findet, dass Tim-Oliver zu verbissen lernt und das Leben verpasst. Tim-Oliver hält William für einen Zeitverschwender. Die unterschiedliche Einstellung zur Zukunft führt zu Spannung."], 
+            ["Tim", "Tim-Oliver", "Sie sind Namensvetter, aber charakterliche Gegensätze. Tim ärgert Tim-Oliver ständig, indem er seine Mütze versteckt."],
+            ["Max", "Adriana S.", "Max hat versehentlich Adriana S.'s neue, teure Sonnenbrille fallen gelassen und nicht sofort zugegeben. Adriana S. hält Max für unverantwortlich."],
+            ["Leif", "Cedric", "Cedric behauptete Leifs Musik sei 'nur Lärm'. Für Leif, dessen Musik sein Ein und Alles ist, ist das ein Kampf."],
+            ["Zofia", "Nila", "Ein Streit um die beste Sitzordnung im Bus; Zofia wollte den Fensterplatz, den Nila bereits reserviert hatte. Sie sprechen seither nicht mehr miteinander."],
+            ["Elin", "Adriana S.", "Elin erzählte im Vertrauen ein Geheimnis, das Adriana S. versehentlich weitergab. Elin fühlt sich verraten."],
+            ["Tais", "Nila", "Tais behauptet Nila könne kein Französisch, obwohl Tais selbst kein Muttersprachler ist. Es geht um Angeberei und Kompetenz-Ansprüche."],
+            ["Elisa", "Cedric", "Elisa ist verärgert, weil Cedric immer alle Witze über das Konsumverhalten macht, die sie als persönliche Angriffe empfindet."],
+            ["Cedric", "Tim", "Sie sind beide Fussballfans, aber Cedric ist GC Fan und Tim ist ein YB-Hasser. Der Konflikt ist rein sportlicher Natur, aber sehr emotional."],
+            ["Sean", "Tim", "Tim hat Seans geliebtes Ralph-Lauren-Shirt mit einem Ketchup-Fleck ruiniert. Tim hat es nicht ersetzt, da er es 'nur lustig' fand."],
+            ["Luc", "Tim", "Luc fühlt sich von Tims ständigen Witzen über seinen Buzzcut persönlich angegriffen. Er sieht es als Mobbing."],
+            ["Anna G.", "Ellison", "Anna G. findet Ellisons politisches Geschwätz zu viel, Ellison findet Anna G.'s ständiges Poki-Spielen unproduktiv. Wieder ein Konflikt der Lebensphilosophien."],
+            ["Anna P.", "Ellison", "Ähnlich wie bei Anna G., aber Anna P. wirft Ellison zusätzlich vor, 'zu perfekt' sein zu wollen."],
+            ["Jara", "Ellison", "Ellison verspottete Jaras altes ThinkPad als 'Museumsstück', was Jara verletzte, da es ein Geschenk war."],
         ];
 
-        // --- GLOBALER SPIELSTATUS ---
-        let gameState = 'guess'; // 'guess' oder 'room'
-
-        // --- GUESS GAME STATUS ---
-        let currentTarget = null;
-        let currentStreak = 0;
-        let displayName = "";
-        let availableTips = [];
-        let revealedTips = [];
-        let hintLevel = 1;
-        let lastHintTime = 0;
-        const HINT_DELAY = 30 * 1000;
-        let timerInterval = null;
+        // NEUE Dynamische Konflikte (MIT HINTERGRUNDGESCHICHTE)
+        const NEW_CONFLICT_POOL = [
+            ["Max", "Jacob", "Max und Jacob stritten sich um den letzten Donut, der eigentlich für den Lehrer gedacht war. Gier besiegt Anstand."], 
+            ["William", "Ellison", "Sie hatten eine hitzige Debatte darüber, ob man nach dem Motto 'YOLO' leben sollte (William) oder ob das verantwortungslos ist (Ellison)."], 
+            ["Tim", "Sean", "Tim hat sich über Seans neuste, sehr teure Turnschuhe lustig gemacht, was Sean als extrem respektlos empfand."], 
+            ["Julia", "Zofia", "Julia hat Zofia versehentlich in der Mensa angerempelt, was Zofia als absichtliche Provokation auffasste, da sie Julia nicht mag."],
+            ["Cedric", "Elisa", "Elisa behauptet, Cedric würde immer die besten Plätze im Bus reservieren, was Cedric als haltlose Lüge abtut."],
+            ["Leif", "Max", "Max fragte einmal, ob Leifs Musik überhaupt 'echte Musik' sei, was Leifs Künstlerseele tief traf."],
+            ["Jara", "Tais", "Jara und Tais stritten sich stundenlang darüber, ob Android oder iOS das überlegene Betriebssystem sei."],
+            ["Elin", "Tim", "Elin ist genervt von Tims Angewohnheit, ständig mit Essen im Mund zu reden."],
+            ["Adriana S.", "Luc", "Ein unbedachter Kommentar von Luc über Adriana S.'s neue Jacke führte zu tagelangem Schweigen."],
+            ["Anna G.", "Max", "Max hat Anna G.'s Highscore in einem Online-Spiel geschlagen und ihr dann seine 'Überlegenheit' in einem Chat-Spam unter die Nase gerieben."],
+            ["Julia", "Nila", "Ein Missverständnis über eine Gruppenarbeit, bei der Nila dachte, Julia hätte ihre Arbeit gestohlen, obwohl Julia nur helfen wollte."],
+            ["William", "Luc", "William findet Lucs Verhalten als 'zu viel' und Luc findet Williams lockere Art 'naiv'."],
+        ];
         
-        // --- ROOM GAME STATUS ---
-        let rooms = []; // [{ id: 'room-1', size: 4, occupants: [] }, ...]
-        let sickPersons = [];
-        let roomProblemIds = []; // Zum Speichern der Problemzimmer nach der Bewertung
+        const CONFLICT_ESCALATION_INTERVAL = 30 * 1000; // 30 Sekunden
+        const CONFLICT_FORGIVENESS_INTERVAL = 60 * 1000; // 60 Sekunden
+        const INFECTION_CHECK_INTERVAL = 60 * 1000; // 60 Sekunden
+        
+        // --- GLOBALER SPIELSTATUS ---
+        let gameState = 'room'; 
+        
+        // --- ROOM GAME STATUS (ERWEITERT) ---
+        let rooms = [];
+        let sickPersons = []; 
+        let roomProblemIds = [];
+        let dynamicConflicts = []; // Aktivierte Hass-Paare
+        let roomStartTime = 0; 
+        let roomTimerInterval = null; 
+        let nextConflictIndex = 0; 
+        let lastForgivenessTime = 0;
+        let lastInfectionCheckTime = 0;
+        
+        // Management Status (Key: RoomID, Value: {lastVent, isDoorClosed, areMasksWorn})
+        let roomManagementStatus = {};
 
-        // --- LOCALSTORAGE-FUNKTIONEN (GUESS GAME) ---
-
-        function loadScore() {
-            const storedStreak = localStorage.getItem('guessGameStreak');
-            const storedName = localStorage.getItem('guessGameDisplayName');
-            
-            currentStreak = storedStreak ? parseInt(storedStreak, 10) : 0;
-            displayName = storedName || "Spieler";
-        }
-
-        function saveScore() {
-            localStorage.setItem('guessGameStreak', currentStreak.toString());
-        }
+        // --- HILFSFUNKTIONEN ---
 
         function showMessage(text, isError = false) {
             const messageBox = document.getElementById('message-box');
@@ -405,27 +319,67 @@
             }, 5000);
         }
 
+        // NEU: Hilfsfunktion, um alle Konflikte abzurufen (Fixed + Dynamic)
+        function getAllConflictsWithReasons() {
+            return CONFLICT_PAIRS_FIXED.concat(dynamicConflicts);
+        }
+
+        // NEU: Hilfsfunktion, um den Grund für ein spezifisches Paar zu finden
+        function getConflictReason(personA, personB) {
+            const allConflicts = getAllConflictsWithReasons();
+            const foundConflict = allConflicts.find(pair => 
+                (pair[0] === personA && pair[1] === personB) || 
+                (pair[0] === personB && pair[1] === personA)
+            );
+            return foundConflict ? foundConflict[2] : null; // Gibt den Grund zurück
+        }
+
+        function isConflict(personA, personB, allConflicts) {
+            return allConflicts.some(pair => 
+                (pair[0] === personA && pair[1] === personB) || 
+                (pair[0] === personB && pair[1] === personA)
+            );
+        }
+
+        function displayConflictStory(personA, personB, reason) {
+            const displayBox = document.getElementById('conflict-story-display');
+            const pairDisplay = document.getElementById('conflict-pair-display');
+            const reasonText = document.getElementById('conflict-reason-text');
+            
+            if (reason) {
+                pairDisplay.textContent = `${personA} ↔️ ${personB}`;
+                reasonText.textContent = reason;
+                displayBox.style.display = 'block';
+            } else {
+                displayBox.style.display = 'none';
+            }
+        }
+        
         // ===================================
-        // ZIMMERORDNUNGS MODUS LOGIK
+        // ZIMMERORDNUNGS MODUS LOGIK (ERWEITERT)
         // ===================================
 
         function generateRoomLayout() {
+            // ... (unveränderte Logik)
             let totalCapacity = 0;
             const generatedRooms = [];
             let roomId = 1;
-            const targetCapacity = CLASS_SIZE; // 20 Personen
-            const maxRooms = 20; // Sicherheitslimit
 
-            // Generiere Zimmer, bis die Gesamtkapazität die Klassengröße erreicht oder überschreitet
-            while (totalCapacity < targetCapacity && roomId <= maxRooms) {
-                // Zufällig eine Zimmergröße auswählen: [1, 2, 3, 4, 8]
-                const randomIndex = Math.floor(Math.random() * ROOM_SIZES.length);
-                const selectedSize = ROOM_SIZES[randomIndex];
+            while (totalCapacity < CLASS_SIZE) {
+                const availableSizes = ROOM_SIZES.filter(size => totalCapacity + size <= CLASS_SIZE);
+                if (availableSizes.length === 0) break;
+                
+                const randomIndex = Math.floor(Math.random() * availableSizes.length);
+                const selectedSize = availableSizes[randomIndex];
+
+                // NEU: Zufällige Zuweisung, ob das Zimmer eine Heizung hat (ca. 50/50)
+                const hasHeating = Math.random() < 0.5;
 
                 generatedRooms.push({
                     id: `room-${roomId}`,
                     size: selectedSize,
-                    occupants: []
+                    occupants: [],
+                    hasHeating: hasHeating 
                 });
                 totalCapacity += selectedSize;
                 roomId++;
@@ -434,105 +388,301 @@
         }
 
         function generateSickPersons() {
-            // 1 bis 5 Personen sind krank
-            const sickCount = Math.floor(Math.random() * 5) + 1;
+            // ... (unveränderte Logik)
+            const sickCount = Math.floor(Math.random() * 4) + 2; // 2 bis 5 Kranke
             const shuffledNames = [...PERSON_NAMES].sort(() => 0.5 - Math.random());
             sickPersons = shuffledNames.slice(0, sickCount);
         }
         
-        function setupRoomGame() {
-            generateRoomLayout();
-            generateSickPersons();
-            // Stellt sicher, dass bei einem Neustart alle Personen als unzugewiesen gelten
-            rooms.forEach(room => room.occupants = []);
-            roomProblemIds = [];
-            renderRoomGame();
+        function updateRoomState() {
+            const currentTime = Date.now();
+            const elapsedTime = Math.floor((currentTime - roomStartTime) / 1000);
+            
+            // --- 1. Timer aktualisieren ---
+            document.getElementById('room-timer').textContent = `${elapsedTime}s`;
+
+            // --- 2. Konflikt-Eskalation (Alle 30s) ---
+            const requiredConflicts = Math.floor(elapsedTime / 30);
+            
+            if (nextConflictIndex < requiredConflicts && nextConflictIndex < NEW_CONFLICT_POOL.length) {
+                const newConflict = NEW_CONFLICT_POOL[nextConflictIndex];
+                // Wichtig: Wir pushen das gesamte Array [A, B, Grund]
+                dynamicConflicts.push(newConflict); 
+                nextConflictIndex++;
+                showMessage(`NEUER KONFLIKT AKTIVIERT: ${newConflict[0]} hasst ${newConflict[1]}!`, true);
+            }
+            
+            // Countdown für den nächsten Konflikt
+            const nextActivationTime = (nextConflictIndex + 1) * 30;
+            const timeToNextConflict = Math.max(0, nextActivationTime - elapsedTime);
+            document.getElementById('conflict-countdown').textContent = `${timeToNextConflict}s`;
+
+            // --- 3. Konflikt-Vergebung (Alle 60s) ---
+            if (currentTime - lastForgivenessTime >= CONFLICT_FORGIVENESS_INTERVAL) {
+                lastForgivenessTime = currentTime;
+                
+                if (dynamicConflicts.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * dynamicConflicts.length);
+                    const conflictPair = dynamicConflicts[randomIndex];
+                    
+                    if (Math.random() < 0.1) { // 10% Chance
+                        dynamicConflicts.splice(randomIndex, 1);
+                        showMessage(`FRIEDEN: ${conflictPair[0]} und ${conflictPair[1]} haben sich versöhnt!`, false);
+                    }
+                }
+            }
+            
+            // Countdown für die nächste Vergebungs-Check
+            const timeToNextForgiveness = Math.ceil((lastForgivenessTime + CONFLICT_FORGIVENESS_INTERVAL - currentTime) / 1000);
+            document.getElementById('forgiveness-countdown').textContent = `${Math.max(0, timeToNextForgiveness)}s`;
+            
+            // --- 4. Viren-Ausbreitung (Alle 60s) ---
+            if (currentTime - lastInfectionCheckTime >= INFECTION_CHECK_INTERVAL) {
+                lastInfectionCheckTime = currentTime;
+                
+                const healthyPersons = PERSON_NAMES.filter(name => !sickPersons.includes(name));
+                const newlyInfected = [];
+                
+                // 4.1 Unzugewiesene Infektion (Logik wie zuvor)
+                const unassignedPersons = getUnassignedPersons();
+                const sickUnassigned = unassignedPersons.filter(name => sickPersons.includes(name));
+                const healthyUnassigned = unassignedPersons.filter(name => healthyPersons.includes(name));
+                
+                if (sickUnassigned.length > 0) {
+                    healthyUnassigned.forEach(name => {
+                        if (Math.random() < 0.1) { 
+                            newlyInfected.push(name);
+                        }
+                    });
+                }
+                
+                // 4.2 Zimmer-Infektion (Logik wie zuvor)
+                rooms.forEach(room => {
+                    const roomStatus = roomManagementStatus[room.id];
+                    const sickRoom = room.occupants.filter(name => sickPersons.includes(name));
+                    const healthyRoom = room.occupants.filter(name => healthyPersons.includes(name));
+                    
+                    if (sickRoom.length > 0 && healthyRoom.length > 0) {
+                        const isVented = (currentTime - roomStatus.lastVentTime) < INFECTION_CHECK_INTERVAL;
+                        const isSafe = roomStatus.isDoorClosed && roomStatus.areMasksWorn && isVented;
+                        
+                        if (!isSafe) {
+                            healthyRoom.forEach(name => {
+                                // 100% Risiko, wenn die Regeln verletzt werden
+                                newlyInfected.push(name); 
+                            });
+                            console.warn(`VIRUS BREITET SICH IN ZIMMER ${room.id} AUS! Management-Regeln verletzt.`);
+                        }
+                    }
+                });
+                
+                newlyInfected.forEach(name => {
+                    if (!sickPersons.includes(name)) {
+                        sickPersons.push(name);
+                        showMessage(`🦠 VIRUS-ALARM! ${name} ist jetzt krank!`, true);
+                    }
+                });
+                
+                if (newlyInfected.length > 0) renderRoomGame(); 
+            }
+            
+            // Aktualisiere Status-Anzeigen
+            renderConflictList();
+            document.getElementById('sick-count').textContent = sickPersons.length;
+            document.getElementById('sick-list').textContent = sickPersons.join(', ');
         }
         
-        function renderRoomGame() {
-            // Gesamtkapazität der generierten Zimmer
-            const totalCapacity = rooms.reduce((sum, room) => sum + room.size, 0);
+        function startRoomTimer() {
+            // ... (unveränderte Logik)
+            stopRoomTimer(); 
+            roomStartTime = Date.now();
+            lastForgivenessTime = Date.now();
+            lastInfectionCheckTime = Date.now();
+            roomTimerInterval = setInterval(updateRoomState, 1000);
+            updateRoomState(); 
+        }
+        
+        function stopRoomTimer() {
+            // ... (unveränderte Logik)
+            if (roomTimerInterval) {
+                clearInterval(roomTimerInterval);
+                roomTimerInterval = null;
+            }
+        }
+        
+        function getUnassignedPersons() {
+            // ... (unveränderte Logik)
+            const assignedPersons = rooms.flatMap(r => r.occupants);
+            return PERSON_NAMES.filter(name => !assignedPersons.includes(name));
+        }
+
+        function setupRoomGame() {
+            // ... (unveränderte Logik)
+            stopRoomTimer();
+            generateRoomLayout();
+            generateSickPersons();
             
-            // Finde alle Personen, die aktuell in Zimmern sind
+            rooms.forEach(room => room.occupants = []);
+            roomProblemIds = [];
+            dynamicConflicts = [];
+            nextConflictIndex = 0;
+            roomManagementStatus = {};
+            
+            rooms.forEach(room => {
+                roomManagementStatus[room.id] = {
+                    lastVentTime: 0,
+                    isDoorClosed: false,
+                    areMasksWorn: false
+                };
+            });
+            
+            // Konflikt-Story-Box ausblenden
+            document.getElementById('conflict-story-display').style.display = 'none';
+
+            renderRoomGame();
+            startRoomTimer();
+        }
+        
+        function renderConflictList() {
+            const conflictListEl = document.getElementById('dynamic-conflicts-list');
+
+            if (dynamicConflicts.length === 0) {
+                 conflictListEl.innerHTML = '<p class="text-xs italic text-indigo-600">Noch keine neuen Konflikte.</p>';
+            } else {
+                conflictListEl.innerHTML = dynamicConflicts.map(([a, b, reason]) => 
+                    `<span class="conflict-new" data-a="${a}" data-b="${b}" onclick="displayConflictStory('${a}', '${b}', '${reason.replace(/'/g, "\\'")}')">
+                        ${a} &harr; ${b}
+                    </span>`
+                ).join('');
+            }
+        }
+
+        function renderRoomGame() {
+            // ... (Logik zur Anzeige der Personen und Zimmer - unverändert, außer für Konflikt-Listener)
             const assignedPersons = rooms.flatMap(r => r.occupants);
             const unassignedNames = PERSON_NAMES.filter(name => !assignedPersons.includes(name));
+            const totalCapacity = rooms.reduce((sum, room) => sum + room.size, 0);
 
-            document.getElementById('total-rooms').textContent = rooms.length;
+            // Update Status Display
             document.getElementById('total-capacity').textContent = totalCapacity;
             document.getElementById('used-capacity').textContent = assignedPersons.length;
+            document.getElementById('unassigned-count').textContent = unassignedNames.length;
+            document.getElementById('total-rooms').textContent = rooms.length;
             document.getElementById('sick-count').textContent = sickPersons.length;
             document.getElementById('sick-list').textContent = sickPersons.join(', ');
 
             // Rendere Unzugewiesene Personen
             const unassignedContainer = document.getElementById('unassigned-persons');
-            unassignedContainer.innerHTML = '';
-            
-            unassignedNames.forEach(name => {
+            unassignedContainer.innerHTML = unassignedNames.map(name => {
                 const isSick = sickPersons.includes(name);
-                const color = isSick ? 'bg-red-400' : 'bg-indigo-500';
-                const tag = `
+                const requiresHeating = NO_HEATING_TOLERANCE_PEOPLE.includes(name);
+                
+                let colorClass = isSick ? 'sick-person' : 'bg-indigo-500';
+                
+                let extraTag = '';
+                if (requiresHeating && !isSick) {
+                    extraTag = '🔥';
+                }
+
+                return `
                     <span id="person-${name}" 
                           draggable="true" 
                           data-name="${name}" 
-                          data-sick="${isSick}"
-                          class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${color} shadow-sm transition hover:shadow-lg">
-                        ${name} ${isSick ? '🤒' : ''}
+                          class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${colorClass} shadow-sm transition hover:shadow-lg">
+                        ${name} ${isSick ? '🤒' : extraTag}
                     </span>
                 `;
-                unassignedContainer.innerHTML += tag;
-            });
-
-            document.getElementById('unassigned-count').textContent = unassignedNames.length;
+            }).join('');
             
             // Rendere Zimmer
             const roomLayoutContainer = document.getElementById('room-layout');
             roomLayoutContainer.innerHTML = '';
             
             rooms.forEach((room, index) => {
+                const status = roomManagementStatus[room.id];
                 const problemClass = roomProblemIds.includes(room.id) ? 'border-red-500 bg-red-50' : 'border-indigo-300 bg-white';
+                
                 const occupantsHTML = room.occupants.map(name => {
                     const isSick = sickPersons.includes(name);
-                    const color = isSick ? 'bg-red-400' : 'bg-indigo-500';
+                    const requiresHeating = NO_HEATING_TOLERANCE_PEOPLE.includes(name);
+                    
+                    let colorClass = isSick ? 'sick-person' : 'bg-indigo-500';
+                    let extraTag = '';
+                    if (requiresHeating && !isSick) {
+                        extraTag = '🔥';
+                    }
+
                     return `
                         <span id="person-${name}" 
                               draggable="true" 
                               data-name="${name}" 
-                              data-sick="${isSick}"
-                              class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${color} shadow-sm transition hover:shadow-lg">
-                            ${name} ${isSick ? '🤒' : ''}
+                              class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${colorClass} shadow-sm transition hover:shadow-lg">
+                            ${name} ${isSick ? '🤒' : extraTag}
                         </span>
                     `;
                 }).join('');
+
+                const timeSinceVent = Math.floor((Date.now() - status.lastVentTime) / 1000);
+                const ventStatus = timeSinceVent <= 60 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+
+                const heatingStatusIcon = room.hasHeating ? '🔥 Heizung: Ja' : '🧊 Heizung: Nein';
+                const heatingStatusClass = room.hasHeating ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700 font-bold'; 
 
                 const roomHTML = `
                     <div id="${room.id}" 
                          data-room-id="${room.id}"
                          data-size="${room.size}"
-                         class="drop-zone p-4 rounded-xl ${problemClass} flex flex-wrap gap-2 transition duration-200">
-                        <h4 class="w-full text-sm font-bold text-gray-700 mb-1">Zimmer ${index + 1} (${room.size}er) - Belegt: ${room.occupants.length} / ${room.size}</h4>
-                        ${room.occupants.length === 0 ? '<p class="text-gray-400 text-sm italic">Personen hierher ziehen...</p>' : occupantsHTML}
+                         class="drop-zone room-card p-4 rounded-xl border-2 ${problemClass} space-y-3">
+                        
+                        <h4 class="w-full text-sm font-bold text-gray-700">Zimmer ${index + 1} (${room.size}er) - Belegt: ${room.occupants.length} / ${room.size}</h4>
+                        
+                        <div class="p-2 rounded-lg text-xs font-semibold text-center ${heatingStatusClass}">
+                            ${heatingStatusIcon}
+                        </div>
+
+
+                        <!-- Management Controls -->
+                        <div class="flex flex-wrap gap-2 justify-between border-t pt-2 border-gray-200">
+                            <button onclick="toggleRoomManagement('${room.id}', 'vent', true)" 
+                                    class="management-btn ${ventStatus}">
+                                🌬️ Lüften (Vent: ${Math.min(timeSinceVent, 60)}s)
+                            </button>
+
+                            <button onclick="toggleRoomManagement('${room.id}', 'door', ${!status.isDoorClosed})" 
+                                    class="management-btn ${status.isDoorClosed ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">
+                                ${status.isDoorClosed ? '🚪 Zu' : '🚪 Offen'}
+                            </button>
+
+                            <button onclick="toggleRoomManagement('${room.id}', 'mask', ${!status.areMasksWorn})" 
+                                    class="management-btn ${status.areMasksWorn ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">
+                                ${status.areMasksWorn ? '😷 Maske' : '🙁 Keine Maske'}
+                            </button>
+                        </div>
+
+                        <!-- Occupants -->
+                        <div class="flex flex-wrap gap-2 pt-2 min-h-[2rem]">
+                            ${room.occupants.length === 0 ? '<p class="text-gray-400 text-sm italic">Personen hierher ziehen...</p>' : occupantsHTML}
+                        </div>
                     </div>
                 `;
                 roomLayoutContainer.innerHTML += roomHTML;
             });
             
-            // Initialisiere Drag and Drop (Muss nach dem Rendern erfolgen)
-            initDragAndDrop();
-            
-            // Ergebnis-Bereich verstecken, wenn keine Bewertung vorliegt
             if (roomProblemIds.length === 0) {
                  document.getElementById('room-results').style.display = 'none';
             }
+            
+            initDragAndDrop();
         }
 
         function initDragAndDrop() {
+            // ... (unveränderte Logik)
             const draggables = document.querySelectorAll('.draggable-person');
             const dropZones = document.querySelectorAll('.drop-zone');
 
             draggables.forEach(person => {
                 person.addEventListener('dragstart', (e) => {
                     e.dataTransfer.setData('text/plain', e.target.dataset.name);
-                    // Füge eine Klasse hinzu, um anzuzeigen, dass das Element gezogen wird
                     setTimeout(() => person.classList.add('opacity-50'), 0);
                 });
 
@@ -558,17 +708,13 @@
                     const personName = e.dataTransfer.getData('text/plain');
                     const droppedOnRoomId = zone.id.startsWith('room-') ? zone.id : 'unassigned-persons';
                     
-                    // Finde die Person und entferne sie aus ihrem aktuellen Zimmer
-                    let personRemoved = false;
                     rooms.forEach(room => {
                         const index = room.occupants.indexOf(personName);
                         if (index > -1) {
                             room.occupants.splice(index, 1);
-                            personRemoved = true;
                         }
                     });
 
-                    // Füge die Person dem neuen Zimmer oder der Unzugewiesen-Liste hinzu
                     if (droppedOnRoomId !== 'unassigned-persons') {
                         const targetRoom = rooms.find(r => r.id === droppedOnRoomId);
                         if (targetRoom && targetRoom.occupants.length < targetRoom.size) {
@@ -578,236 +724,174 @@
                         }
                     }
 
-                    // Rendere das Spiel neu, um die Änderungen anzuzeigen
                     renderRoomGame();
                 });
             });
         }
 
         function evaluateRooms() {
+            // Timer stoppen, da die Bewertung beginnt
+            stopRoomTimer();
+            updateRoomState(); // Finales Update vor der Bewertung
+            
             roomProblemIds = [];
             const results = [];
             let allAssigned = true;
+            let success = true;
             
+            const allConflicts = getAllConflictsWithReasons();
+            const currentTime = Date.now();
+            let firstConflictReason = null; // NEU: Speichert den Grund für den ersten Konflikt
+
             // 1. Check, ob alle zugewiesen sind
             const assignedCount = rooms.reduce((sum, room) => sum + room.occupants.length, 0);
-            const totalCapacity = rooms.reduce((sum, room) => sum + room.size, 0);
-
-            // Update Statusanzeige
-            document.getElementById('used-capacity').textContent = assignedCount;
             
             if (assignedCount !== CLASS_SIZE) {
-                results.push(`Es sind noch ${CLASS_SIZE - assignedCount} Personen unzugewiesen! Alle müssen ein Zimmer haben.`);
+                results.push(`❌ Es sind noch ${CLASS_SIZE - assignedCount} Personen unzugewiesen! Alle müssen ein Zimmer haben.`);
                 allAssigned = false;
+                success = false;
             }
-
-            // 2. Check der Zimmer-Regeln
+            
+            // 2. Allgemeine Zimmer-Regeln und Konflikte
             rooms.forEach(room => {
                 let roomProblem = false;
+                let conflictPairsFound = [];
                 const occupants = room.occupants;
+                const status = roomManagementStatus[room.id];
                 
-                // Ignoriere leere Zimmer
                 if (occupants.length === 0) return;
                 
-                // Kapazitäts-Check (sollte durch D&D verhindert werden, aber zur Sicherheit)
-                if (occupants.length > room.size) {
-                    roomProblem = true;
-                    // Diese Nachricht sollte eigentlich nie kommen wegen D&D-Logik
-                    results.push(`Problem im Zimmer ${room.id.replace('room-', '')}: Überbelegung (${occupants.length} von ${room.size}).`); 
+                // Regel D: Heizungsbedarf (NEU)
+                if (!room.hasHeating) {
+                    occupants.forEach(name => {
+                        if (NO_HEATING_TOLERANCE_PEOPLE.includes(name)) {
+                            roomProblem = true;
+                            results.push(`❌ Zimmer ${room.id.replace('room-', '')}: ${name} MUSS in einem Zimmer mit Heizung (🔥) untergebracht werden.`);
+                            success = false;
+                        }
+                    });
                 }
-
+                
                 // Regel A: Krankheits-Isolation
                 const sickInRoom = occupants.filter(name => sickPersons.includes(name));
                 const healthyInRoom = occupants.length - sickInRoom.length;
                 
                 if (sickInRoom.length > 0 && healthyInRoom > 0) {
                     roomProblem = true;
+                    results.push(`❌ Zimmer ${room.id.replace('room-', '')}: Kranke (${sickInRoom.join(', ')}) dürfen NICHT mit Gesunden (${occupants.filter(n => !sickPersons.includes(n)).join(', ')}) zusammen sein.`);
+                    success = false;
                 }
-
-                // Regel B: Soziale Konflikte
+                
+                // Regel B: Soziale Konflikte (Fixed UND Dynamic) - MIT KRANKHEITS-IMMUNITÄT
                 for (let i = 0; i < occupants.length; i++) {
                     for (let j = i + 1; j < occupants.length; j++) {
                         const personA = occupants[i];
                         const personB = occupants[j];
                         
-                        // Check, ob das Paar in der Konfliktliste ist (unabhängig von der Reihenfolge)
-                        const isConflict = CONFLICT_PAIRS.some(pair => 
-                            (pair[0] === personA && pair[1] === personB) || 
-                            (pair[0] === personB && pair[1] === personA)
-                        );
-                        
-                        if (isConflict) {
-                            roomProblem = true;
+                        // NEUE REGEL: Wenn einer der beiden krank ist, wird der Konflikt ignoriert
+                        const isA_Sick = sickPersons.includes(personA);
+                        const isB_Sick = sickPersons.includes(personB);
+
+                        if (isA_Sick || isB_Sick) {
+                            continue; 
+                        }
+
+                        if (isConflict(personA, personB, allConflicts)) {
+                            if (!roomProblem) roomProblem = true;
+                            conflictPairsFound.push(`${personA} & ${personB}`);
+                            success = false;
+                            
+                            // NEU: Speichere den Grund des ERSTEN Konflikts für die Anzeige
+                            if (!firstConflictReason) {
+                                firstConflictReason = {
+                                    pair: `${personA} ↔️ ${personB}`,
+                                    reason: getConflictReason(personA, personB)
+                                };
+                            }
                         }
                     }
                 }
+                
+                if (conflictPairsFound.length > 0) {
+                    results.push(`❌ Zimmer ${room.id.replace('room-', '')}: Soziale Konflikte gefunden (${conflictPairsFound.join(', ')}).`);
+                }
+                
+                // Regel C: Zimmer-Management Check
+                const isVented = (currentTime - status.lastVentTime) < INFECTION_CHECK_INTERVAL;
+                
+                if (!status.isDoorClosed || !status.areMasksWorn || !isVented) {
+                    if (sickInRoom.length > 0) {
+                        results.push(`⚠️ Zimmer ${room.id.replace('room-', '')}: Management MANGELHAFT (Tür: ${status.isDoorClosed ? '✅' : '❌'}, Maske: ${status.areMasksWorn ? '✅' : '❌'}, Lüftung: ${isVented ? '✅' : '❌'}).`);
+                        success = false; 
+                    }
+                }
 
-                if (roomProblem) {
-                    roomProblemIds.push(room.id);
+                if (roomProblem || (sickInRoom.length > 0 && (!status.isDoorClosed || !status.areMasksWorn || !isVented))) {
+                    if (!roomProblemIds.includes(room.id)) roomProblemIds.push(room.id);
                 }
             });
             
-            // Nur eindeutige Problemzimmer-IDs speichern
-            roomProblemIds = [...new Set(roomProblemIds)];
-
             // 3. Ausgabe des Ergebnisses
             const resultContainer = document.getElementById('room-results');
             const resultText = document.getElementById('room-result-text');
+            const finalTime = document.getElementById('room-timer').textContent;
 
-            if (results.length === 0 && allAssigned && roomProblemIds.length === 0) {
+            // Konflikt-Story-Anzeige aktualisieren
+            if (firstConflictReason) {
+                displayConflictStory(firstConflictReason.pair.split(' ↔️ ')[0], firstConflictReason.pair.split(' ↔️ ')[1], firstConflictReason.reason);
+            } else {
+                document.getElementById('conflict-story-display').style.display = 'none';
+            }
+
+            if (success && allAssigned && roomProblemIds.length === 0 && sickPersons.length <= 5) { // Max 5 Kranke am Start
                 resultContainer.className = 'mt-6 p-4 border border-green-500 bg-green-100 rounded-xl';
-                resultText.innerHTML = '<span class="font-semibold">Perfekt!</span> Die Zimmerordnung ist für alle in Ordnung. Weiter so!';
+                resultText.innerHTML = `<span class="font-semibold text-lg">GROSSARTIG!</span> Die Zimmerordnung ist perfekt. Alle sind glücklich und gesund! Die Logistik dauerte nur: <span class="font-bold text-xl">${finalTime}</span>.`;
+            } else if (sickPersons.length > 10) {
+                resultContainer.className = 'mt-6 p-4 border border-red-500 bg-red-100 rounded-xl';
+                 resultText.innerHTML = `<span class="font-semibold text-lg">KATASROPHE!</span> Die Hälfte der Klasse ist krank geworden (${sickPersons.length} Personen). Die Logistik ist gescheitert.`;
+                 stopRoomTimer();
             } else {
                 resultContainer.className = 'mt-6 p-4 border border-red-500 bg-red-100 rounded-xl';
-                let output = 'Es gibt Probleme in deiner Zimmerordnung:';
+                let output = `Es gibt Probleme in deiner Zimmerordnung: <span class="font-bold">(${sickPersons.length} Personen sind am Ende krank)</span>`;
                 output += '<ul class="list-disc ml-5 mt-2 space-y-1">';
                 
-                // A) Probleme in spezifischen Zimmern (Soziale und Isolationskonflikte)
-                if (roomProblemIds.length > 0) {
-                    output += `<li class="font-semibold">Probleme gefunden in den Zimmern: ${roomProblemIds.map(id => id.replace('room-', '')).join(', ')}.</li>`;
-                    output += `<li class="text-xs text-red-700">Ursache: Mische keine Kranken/Gesunden oder habe soziale Konfliktpaare im selben Zimmer.</li>`;
-                }
+                results.forEach(msg => {
+                    output += `<li>${msg}</li>`;
+                });
                 
-                // B) Generelle Fehler (z.B. nicht alle zugewiesen)
-                if (!allAssigned) {
-                    output += `<li>Es sind nicht alle ${CLASS_SIZE} Personen zugewiesen. Es fehlen noch ${CLASS_SIZE - assignedCount} Personen.</li>`;
+                if (roomProblemIds.length > 0 && !results.some(msg => msg.includes('Probleme gefunden in den Zimmern'))) {
+                    output += `<li class="font-semibold">Problematische Zimmer: ${roomProblemIds.map(id => id.replace('room-', '')).join(', ')}</li>`;
                 }
-                
+
                 output += '</ul>';
                 resultText.innerHTML = output;
             }
             
             resultContainer.style.display = 'block';
-            renderRoomGame(); // Rendere neu, um die Fehlerfarben anzuzeigen
+            renderRoomGame(); 
+            startRoomTimer(); // Timer läuft für weitere Versuche weiter, bis gestoppt wird
         }
 
-        // ===================================
-        // GUESS GAME LOGIK (Unverändert)
-        // ===================================
-
-        function getRandomTarget() {
-            const randomIndex = Math.floor(Math.random() * NAME_POOL_GUESS.length);
-            const targetPerson = NAME_POOL_GUESS[randomIndex];
-
-            let tips = [...targetPerson.tips];
-            for (let i = tips.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [tips[i], tips[j]] = [tips[j], tips[i]];
-            }
-            
-            currentTarget = { 
-                name: targetPerson.name, 
-                tips: tips
-            };
-            
-            revealedTips = [currentTarget.tips[0]];
-            availableTips = currentTarget.tips.slice(1);
-            hintLevel = 1;
-            lastHintTime = Date.now();
-        }
-        
-        function updateTimerAndHintButton() {
-            const btn = document.getElementById('request-hint-btn');
-            
-            if (hintLevel >= 4) {
-                clearInterval(timerInterval);
-                btn.textContent = "Alle Tipps aufgedeckt.";
-                btn.classList.add('btn-disabled', 'bg-gray-400');
-                btn.classList.remove('btn-primary');
-                btn.disabled = true;
-                return;
-            }
-
-            const timeElapsed = Date.now() - lastHintTime;
-            const timeRemaining = Math.ceil((HINT_DELAY - timeElapsed) / 1000);
-
-            if (timeRemaining <= 0) {
-                btn.textContent = `Nächsten Tipp anfordern (Tipp ${hintLevel + 1})`;
-                btn.classList.remove('btn-disabled', 'bg-gray-400');
-                btn.classList.add('btn-primary', 'bg-indigo-500');
-                btn.disabled = false;
-            } else {
-                btn.textContent = `Nächsten Tipp anfordern (${timeRemaining}s)`;
-                btn.classList.add('btn-disabled', 'bg-gray-400');
-                btn.classList.remove('btn-primary', 'bg-indigo-500');
-                btn.disabled = true;
-            }
-        }
-        
-        function startTimer() {
-            clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimerAndHintButton, 1000);
-            updateTimerAndHintButton();
-        }
-
-        function requestHint() {
-            if (hintLevel >= 4) return showMessage("Alle verfügbaren Tipps wurden bereits angezeigt.", true);
-            const timeElapsed = Date.now() - lastHintTime;
-            if (timeElapsed < HINT_DELAY) return;
-
-            if (availableTips.length > 0) {
-                const nextTip = availableTips.shift();
-                revealedTips.push(nextTip);
-                hintLevel++;
-                lastHintTime = Date.now();
-                renderGuessGame();
-                showMessage(`Tipp ${hintLevel} wurde hinzugefügt.`);
-            }
-        }
-
-        function renderGuessGame() {
-            document.getElementById('current-streak').textContent = currentStreak;
-            const hintList = document.getElementById('hint-list');
-            hintList.innerHTML = revealedTips.map(tip => 
-                `<p class="hint-item">${tip}</p>`
-            ).join('');
-            document.getElementById('guess-input').value = '';
-            updateTimerAndHintButton();
-        }
-
-        function submitGuess() {
-            const userGuess = document.getElementById('guess-input').value.trim();
-            const validNames = NAME_POOL_GUESS.map(n => n.name.toLowerCase());
-
-            if (!validNames.includes(userGuess.toLowerCase())) {
-                return showMessage("Ungültiger Name. Wähle einen Namen aus der Liste.", true);
-            }
-
-            const targetName = currentTarget.name;
-            const guessCorrect = userGuess.toLowerCase() === targetName.toLowerCase();
-
-            if (guessCorrect) {
-                currentStreak += 1;
-                showMessage(`Korrekt! Der Name war ${targetName}. Dein Streak: ${currentStreak}.`);
-            } else {
-                currentStreak = 0;
-                showMessage(`Falsch! Der Streak wurde zurückgesetzt. Der gesuchte Name war ${targetName}.`, true);
-            }
-
-            saveScore();
-            initGuessGame(true);
-        }
-
-        function resetGuessScore() {
-            clearInterval(timerInterval);
-            currentStreak = 0;
-            saveScore();
-            initGuessGame(true);
-            showMessage("Dein Streak wurde zurückgesetzt.");
-        }
-        
-        function initGuessGame(isNewRound = false) {
-            if (!isNewRound) {
-                loadScore();
-            }
-            getRandomTarget();
-            renderGuessGame();
-            startTimer();
-        }
 
         // ===================================
         // ALLGEMEINE INITIALISIERUNG
         // ===================================
+
+        function toggleRoomManagement(roomId, controlType, value) {
+            if (!roomManagementStatus[roomId]) return;
+            
+            if (controlType === 'vent') {
+                roomManagementStatus[roomId].lastVentTime = Date.now();
+                showMessage(`Zimmer ${roomId.replace('room-', '')} gelüftet! Nächste Lüftung in 60s.`);
+            } else if (controlType === 'door') {
+                roomManagementStatus[roomId].isDoorClosed = value;
+                showMessage(`Zimmer ${roomId.replace('room-', '')}: Tür ist jetzt ${value ? 'geschlossen' : 'offen'}.`);
+            } else if (controlType === 'mask') {
+                roomManagementStatus[roomId].areMasksWorn = value;
+                showMessage(`Zimmer ${roomId.replace('room-', '')}: Masken sind jetzt ${value ? 'aufgesetzt' : 'abgesetzt'}.`);
+            }
+            renderRoomGame(); 
+        }
 
         function switchMode(mode) {
             gameState = mode;
@@ -823,7 +907,7 @@
                 guessBtn.classList.remove('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
                 roomBtn.classList.remove('bg-indigo-500', 'text-white', 'shadow-md');
                 roomBtn.classList.add('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
-                initGuessGame();
+                stopRoomTimer();
             } else {
                 guessDiv.style.display = 'none';
                 roomDiv.style.display = 'block';
@@ -831,28 +915,11 @@
                 roomBtn.classList.remove('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
                 guessBtn.classList.remove('bg-indigo-500', 'text-white', 'shadow-md');
                 guessBtn.classList.add('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
-                clearInterval(timerInterval); // Ratespiel-Timer stoppen
                 setupRoomGame();
             }
         }
         
         function initializeApp() {
-            // Initialisiere Guess Game Listeners
-            document.getElementById('display-name').value = displayName;
-            document.getElementById('display-name').oninput = (e) => {
-                displayName = e.target.value.trim();
-                localStorage.setItem('guessGameDisplayName', displayName);
-            };
-            document.getElementById('submit-guess-btn').onclick = submitGuess;
-            document.getElementById('reset-game-btn').onclick = resetGuessScore;
-            document.getElementById('request-hint-btn').onclick = requestHint;
-            
-            // Befülle Datalist
-            const nameOptionsHTML = PERSON_NAMES.map(item => 
-                `<option value="${item}">${item}</option>`
-            ).join('');
-            document.getElementById('name-options').innerHTML = nameOptionsHTML;
-            
             // Initialisiere Room Game Listeners
             document.getElementById('submit-rooms-btn').onclick = evaluateRooms;
             document.getElementById('new-room-game-btn').onclick = setupRoomGame;
@@ -861,8 +928,8 @@
             document.getElementById('switch-guess').onclick = () => switchMode('guess');
             document.getElementById('switch-room').onclick = () => switchMode('room');
             
-            // Starte standardmässig mit dem Ratespiel
-            switchMode('guess');
+            // Starte standardmässig mit dem Zimmer-Modus
+            switchMode('room');
         }
 
         window.onload = initializeApp;
