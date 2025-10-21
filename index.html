@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wer Bin Ich? (Einzelspieler)</title>
+    <title>Wer Bin Ich? & Zimmerordnung</title>
     <!-- Tailwind CSS laden -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -18,7 +18,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border-radius: 1.5rem;
             max-width: 90%;
-            width: 500px;
+            width: 800px; /* Breiter für Zimmerordnung */
         }
         .btn-primary {
             transition: all 0.15s ease-in-out;
@@ -44,67 +44,133 @@
             display: inline-block; 
             width: 1.5rem;
         }
+        .draggable-person {
+            cursor: grab;
+        }
+        .drop-zone {
+            min-height: 4rem;
+            border: 2px dashed #9ca3af; /* gray-400 */
+            transition: background-color 0.2s;
+        }
+        .drop-zone.drag-over {
+            background-color: #eef2ff; /* indigo-50 */
+            border-color: #4f46e5; /* indigo-600 */
+        }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
-    <main class="container-card p-8">
+<body class="flex items-start justify-center p-4">
+    <main class="container-card p-8 mt-8">
         <div id="app-container">
-            <h1 class="text-3xl font-bold mb-6 text-gray-800">Wer Bin Ich? - Das Einzelspiel</h1>
+            <h1 class="text-3xl font-bold mb-4 text-gray-800">Klassenfahrt Spiele</h1>
+            
+            <div id="mode-switcher" class="flex justify-center space-x-4 mb-6">
+                <button id="switch-guess" data-mode="guess" class="px-4 py-2 font-semibold rounded-lg bg-indigo-500 text-white shadow-md">
+                    Wer Bin Ich?
+                </button>
+                <button id="switch-room" data-mode="room" class="px-4 py-2 font-semibold rounded-lg border border-indigo-500 text-indigo-700 hover:bg-indigo-50">
+                    Zimmerordnung
+                </button>
+            </div>
             
             <div id="message-box" style="display:none;"></div>
 
-            <!-- Display Name und Streak -->
-            <div class="p-4 bg-gray-100 border border-gray-200 rounded-xl mb-6 flex justify-between items-center">
-                <div class="flex flex-col">
-                    <label for="display-name" class="block text-xs font-medium text-gray-600 mb-1">Dein Name</label>
-                    <input type="text" id="display-name" placeholder="Spielername" class="bg-gray-100 font-bold text-lg text-gray-800 border-none p-0 focus:ring-0" maxlength="15">
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-600">Aktueller Streak:</p>
-                    <span id="current-streak" class="text-3xl font-extrabold text-indigo-600">0</span>
-                </div>
-            </div>
-
-            <!-- Rundeninformation mit Beschreibung (Einzel-Tipp) -->
-            <div class="p-6 bg-indigo-50 border border-indigo-200 rounded-2xl mb-6">
-                <h2 class="text-xl font-bold text-indigo-800 mb-4">Hinweise zur gesuchten Person:</h2>
+            <div id="guess-game" style="display:none;">
+                <!-- Wer Bin Ich? (RATESPIEL) -->
                 
-                <div id="hint-list" class="space-y-2 mb-4 text-indigo-700">
-                    <!-- Tipps werden hier per JS eingefügt -->
-                    <p class="text-base font-medium italic">Spiel wird gestartet...</p>
+                <!-- Display Name und Streak -->
+                <div class="p-4 bg-gray-100 border border-gray-200 rounded-xl mb-6 flex justify-between items-center">
+                    <div class="flex flex-col">
+                        <label for="display-name" class="block text-xs font-medium text-gray-600 mb-1">Dein Name</label>
+                        <input type="text" id="display-name" placeholder="Spielername" class="bg-gray-100 font-bold text-lg text-gray-800 border-none p-0 focus:ring-0" maxlength="15">
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Aktueller Streak:</p>
+                        <span id="current-streak" class="text-3xl font-extrabold text-indigo-600">0</span>
+                    </div>
                 </div>
 
-                <!-- Tipp-Anfordern-Bereich -->
-                <div id="hint-controls" class="border-t border-indigo-200 pt-4 mt-4">
-                    <button id="request-hint-btn" class="btn-primary w-full text-white p-3 rounded-xl font-bold text-sm" disabled>
-                        Nächsten Tipp anfordern (<span id="time-remaining">30</span>s)
-                    </button>
+                <!-- Rundeninformation mit Beschreibung (Einzel-Tipp) -->
+                <div class="p-6 bg-indigo-50 border border-indigo-200 rounded-2xl mb-6">
+                    <h2 class="text-xl font-bold text-indigo-800 mb-4">Hinweise zur gesuchten Person:</h2>
+                    
+                    <div id="hint-list" class="space-y-2 mb-4 text-indigo-700">
+                        <p class="text-base font-medium italic">Spiel wird gestartet...</p>
+                    </div>
+
+                    <!-- Tipp-Anfordern-Bereich -->
+                    <div id="hint-controls" class="border-t border-indigo-200 pt-4 mt-4">
+                        <button id="request-hint-btn" class="btn-primary w-full text-white p-3 rounded-xl font-bold text-sm" disabled>
+                            Nächsten Tipp anfordern (<span id="time-remaining">30</span>s)
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Rate-Eingabe (Textfeld) -->
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-700">Dein Tipp</h2>
+                    <div class="flex space-x-3">
+                        <input type="text" id="guess-input" 
+                               placeholder="Name hier eingeben" 
+                               list="name-options" 
+                               class="flex-grow p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                        <datalist id="name-options">
+                            <!-- Wird per JS befüllt -->
+                        </datalist>
+                        <button id="submit-guess-btn" class="btn-primary text-white p-3 rounded-xl font-bold px-6 border-indigo-500">Raten</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Du musst den Namen aus der Liste korrekt eingeben.</p>
+                </div>
+                
+                <button id="reset-game-btn" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-red-500 transition duration-150">Streak zurücksetzen</button>
             </div>
 
-            <!-- Rate-Eingabe (Textfeld) -->
-            <div class="mb-4">
-                <h2 class="text-xl font-semibold mb-3 text-gray-700">Dein Tipp</h2>
-                <div class="flex space-x-3">
-                    <input type="text" id="guess-input" 
-                           placeholder="Name hier eingeben" 
-                           list="name-options" 
-                           class="flex-grow p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
-                    <datalist id="name-options">
-                        <!-- Wird per JS befüllt -->
-                    </datalist>
-                    <button id="submit-guess-btn" class="btn-primary text-white p-3 rounded-xl font-bold px-6 border-indigo-500">Raten</button>
+            <div id="room-game" style="display:none;">
+                <!-- Zimmerordnung (ZUORDNUNGSSPIEL) -->
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Zimmerordnung für die Klassenfahrt</h2>
+
+                <div id="room-status" class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-6 text-sm text-yellow-800 font-medium">
+                    <p>Total Zimmer: <span id="total-rooms">0</span></p>
+                    <p>Belegte Betten: <span id="used-capacity">0</span> von <span id="total-capacity">0</span> (Gesamtkapazität)</p>
+                    <p>Kranke Personen (müssen isoliert werden oder nur mit Kranken): <span id="sick-count">0</span> (<span id="sick-list"></span>)</p>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Du musst den Namen aus der Liste korrekt eingeben.</p>
+
+                <!-- Personen zum Zuweisen -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">Unzugewiesene Personen (<span id="unassigned-count">20</span>)</h3>
+                    <div id="unassigned-persons" class="flex flex-wrap gap-2 p-3 bg-gray-100 rounded-xl drop-zone border-gray-300">
+                        <!-- Personen-Tags werden hier eingefügt -->
+                    </div>
+                </div>
+
+                <!-- Zimmer-Container -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-700">Zimmerplan</h3>
+                    <div id="room-layout" class="space-y-4">
+                        <!-- Zimmer werden hier eingefügt -->
+                    </div>
+                </div>
+                
+                <!-- Bewertungs-Button -->
+                <button id="submit-rooms-btn" class="mt-6 w-full btn-primary text-white p-3 rounded-xl font-bold px-6 border-indigo-500">
+                    Zimmerordnung absenden
+                </button>
+
+                <button id="new-room-game-btn" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-indigo-500 transition duration-150">
+                    Neue Zimmerordnung starten
+                </button>
+                
+                <div id="room-results" class="mt-6 p-4 border rounded-xl" style="display:none;">
+                    <h3 class="text-xl font-bold mb-2">Bewertungsergebnis</h3>
+                    <p id="room-result-text"></p>
+                </div>
+
             </div>
-            
-            <button id="reset-game-btn" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-red-500 transition duration-150">Streak zurücksetzen</button>
         </div>
     </main>
 
     <script>
-        // --- SPIELKONSTANTEN ---
-        const NAME_POOL = [
+        // --- ALLGEMEINE SPIELKONSTANTEN (Unverändert) ---
+        const NAME_POOL_GUESS = [
             { name: "Nila", tips: ["Ist offen und hilfsbereit.", "Hat blonde Haare.", "Trägt Ohrringe.", "Ist mittelgross und gehört zur 6erGruppe."] },
             { name: "Adriana S.", tips: ["Hat braune Haare und braune Augen.", "Nutzt ein Moncler Brillenetui.", "Ist Mitglied der 6erGruppe.", "Eher unauffällig in der Gruppe."] },
             { name: "Ellison", tips: ["Ist politisch engagiert.", "Ist blond und hat Sommersprossen.", "Ist Amerikanisch.", "Gehört zur 6erGruppe."] },
@@ -124,30 +190,198 @@
             { name: "Sean", tips: ["Trägt meistens Ralph Lauren.", "Hat einen Mittelscheitel.", "Hat blonde Haare und gehört zur 6erGruppe.", "Ist der beste Freund von Luc."] },
             { name: "Anna G.", tips: ["Ist immer auf GrowMyGarden.", "Spielt Poki.", "Hat Style und ist blond.", "Wird als \"fast provisorisch\" beschrieben."] },
             { name: "Anna P.", tips: ["Hat lange, braune Haare.", "Hat \"Glupschaugen\".", "Ist immer auf Poki.", "Ist die beste Freundin von Anna G."] },
-            { name: "Jara", tips: ["Spielt auch immer Poki.", "Hat blondbraune Haare.", "Hat mittellange Haare.", "Besitzt ein ThinkPad."] },
-            // NEUE EINTRÄGE HINZUGEFÜGT
-            { name: "Noah", tips: ["Hat glatte, blonde Haare.", "Ist der beste Freund von Elisa.", "Trägt oft Markenkleidung.", "Ist in der Max/Leif-Gruppe."] },
-            { name: "Livia", tips: ["Trägt gerne Crop-Tops.", "Hat schulterlange, braune Haare.", "Ist ruhig und oft am Handy.", "Ist Teil der Anna/Jara-Gruppe."] },
-            { name: "Manuel", tips: ["Hat einen Bart.", "Ist gross und hat dunkle Haare.", "Interessiert sich für Geschichte.", "War in der Mongolei dabei."] },
-            { name: "Mila", tips: ["Ist die Klassenbeste in Deutsch.", "Hat rotbraune, lockige Haare.", "Liest gerne Bücher.", "Ist oft mit Zofia zusammen."] },
-            { name: "Jonas", tips: ["Ist der Klassen-DJ.", "Hat lockige, braune Haare.", "Ist sehr sportlich.", "Hat eine Schwäche für Süsses."] },
-            { name: "Sina", tips: ["Hat einen Hund namens Max.", "Ist die Klassenrepräsentantin.", "Trägt eine Brille.", "Ist sehr organisiert und hilfsbereit."] },
-            { name: "Elias", tips: ["Ist sehr gut in Chemie.", "Hat schwarze, kurze Haare.", "Ist der beste Freund von Jacob.", "Trägt immer eine schwarze Uhr."] },
-            { name: "Mia", tips: ["Ist sehr kreativ und zeichnet viel.", "Hat lange, glatte blonde Haare.", "War in der Theatergruppe.", "Ist sehr oft mit Nila zusammen."] }
+            { name: "Jara", tips: ["Spielt auch immer Poki.", "Hat blondbraune Haare.", "Hat mittellange Haare.", "Besitzt ein ThinkPad."] }
         ];
 
-        // --- SPIELSTATUS (LOKAL) ---
-        let currentTarget = null;          // Enthält { name, tips } (alle 4 Tipps, zufällig sortiert)
+        // --- ZIMMERORDNUNG KONSTANTEN ---
+        const CLASS_SIZE = 20;
+        // Verfügbare Zimmergrößen
+        const ROOM_SIZES = [1, 2, 3, 4, 8]; 
+        
+        // Personen-Liste für den Zimmer-Modus
+        const PERSON_NAMES = NAME_POOL_GUESS.map(p => p.name);
+        
+        /* * Explizite Konfliktpaare: Wenn beide im selben Zimmer sind, gibt es ein Problem.
+         * Jedes Paar muss nur einmal definiert werden (z.B. ["A", "B"] genügt für A mag B nicht und B mag A nicht).
+         */
+        const CONFLICT_PAIRS = [
+            // --- Allgemeine Konflikte (Basis) ---
+            ["Zofia", "Tim"], 
+            ["Tim-Oliver", "Luc"], 
+            ["Ellison", "Jacob"], 
+            
+            // --- Konflikte für Adriana S. ---
+            ["Adriana S.", "Anna G."], 
+            ["Adriana S.", "Tim"],
+            ["Adriana S.", "William"],
+            ["Adriana S.", "Jacob"],
+            ["Adriana S.", "Tim-Oliver"],
+            ["Adriana S.", "Leif"],
+            ["Adriana S.", "Zofia"],
+            ["Adriana S.", "Anna P."],
+            ["Adriana S.", "Jara"],
+
+            // --- Konflikte für Nila ---
+            ["Nila", "Jacob"],
+            ["Nila", "Tim-Oliver"],
+            ["Nila", "Leif"],
+            ["Nila", "Anna G."],
+            ["Nila", "Anna P."],
+            ["Nila", "Jara"],
+            
+            // --- Konflikte für Julia ---
+            ["Julia", "Tim"],
+            ["Julia", "William"],
+            ["Julia", "Jacob"],
+            ["Julia", "Tim-Oliver"],
+            ["Julia", "Leif"],
+            ["Julia", "Max"],
+            ["Julia", "Luc"],
+            ["Julia", "Sean"],
+            ["Julia", "Adriana S."], // Julia will nicht mit Adriana S.
+            ["Julia", "Jara"],
+            ["Julia", "Anna G."],
+            ["Julia", "Anna P."],
+
+            // --- Neue Konflikte aus der aktuellen Liste (dedupliziert) ---
+            // Ellison (nicht mit Tim, William, Leif)
+            ["Ellison", "Tim"],
+            ["Ellison", "William"],
+            ["Ellison", "Leif"],
+            
+            // William (nicht mit Tim-Oliver)
+            ["William", "Tim-Oliver"],
+            
+            // Tim (nicht mit Tim-Oliver)
+            ["Tim", "Tim-Oliver"],
+
+            // Tim-Oliver (nicht mit Anna G., Anna P., Jara)
+            ["Tim-Oliver", "Anna G."],
+            ["Tim-Oliver", "Anna P."],
+            ["Tim-Oliver", "Jara"],
+            
+            // Max (nicht mit Adriana S., Nila, Tais, Elisa, Zofia, Elin)
+            ["Max", "Adriana S."], 
+            ["Max", "Nila"],
+            ["Max", "Tais"],
+            ["Max", "Elisa"],
+            ["Max", "Zofia"],
+            ["Max", "Elin"],
+            
+            // Leif (nicht mit Cedric, Luc, Sean)
+            ["Leif", "Cedric"],
+            ["Leif", "Luc"],
+            ["Leif", "Sean"],
+            
+            // Zofia (nicht mit Nila, Ellison, Cedric, Luc, Sean, Anna G., Anna P., Jara)
+            ["Zofia", "Nila"],
+            ["Zofia", "Ellison"],
+            ["Zofia", "Cedric"],
+            ["Zofia", "Luc"],
+            ["Zofia", "Sean"],
+            ["Zofia", "Anna G."],
+            ["Zofia", "Anna P."],
+            ["Zofia", "Jara"],
+            
+            // Elin (nicht mit Adriana S., Nila, Tim-Oliver, Leif, Luc, Cedric, Sean, Jara, Anna P., Anna G., Tais)
+            ["Elin", "Adriana S."],
+            ["Elin", "Nila"],
+            ["Elin", "Tim-Oliver"],
+            ["Elin", "Leif"],
+            ["Elin", "Luc"],
+            ["Elin", "Cedric"],
+            ["Elin", "Sean"],
+            ["Elin", "Jara"],
+            ["Elin", "Anna P."],
+            ["Elin", "Anna G."],
+            ["Elin", "Tais"],
+            
+            // Tais (nicht mit Nila, Adriana S., Tim, William, Jacob, Tim-Oliver, Leif, Cedric, Luc, Anna P., Anna G., Jara)
+            ["Tais", "Nila"],
+            ["Tais", "Adriana S."],
+            ["Tais", "Tim"],
+            ["Tais", "William"],
+            ["Tais", "Jacob"],
+            ["Tais", "Leif"],
+            ["Tais", "Cedric"],
+            ["Tais", "Luc"],
+            ["Tais", "Anna P."],
+            ["Tais", "Anna G."],
+            ["Tais", "Jara"],
+            
+            // Elisa (nicht mit Cedric, Luc, Sean, Adriana S., Nila, Ellison, Anna G., Anna P.)
+            ["Elisa", "Cedric"],
+            ["Elisa", "Luc"],
+            ["Elisa", "Sean"],
+            ["Elisa", "Adriana S."],
+            ["Elisa", "Nila"],
+            ["Elisa", "Ellison"],
+            ["Elisa", "Anna G."],
+            ["Elisa", "Anna P."],
+            
+            // Cedric (nicht mit Tim, Jara, Anna P., Anna G.)
+            ["Cedric", "Tim"],
+            ["Cedric", "Jara"],
+            ["Cedric", "Anna P."],
+            ["Cedric", "Anna G."],
+            
+            // Sean (nicht mit Tim, William, Jacob, Tim-Oliver, Anna P., Anna G., Jara, Tais)
+            ["Sean", "Tim"],
+            ["Sean", "William"],
+            ["Sean", "Jacob"],
+            ["Sean", "Tim-Oliver"],
+            ["Sean", "Anna P."],
+            ["Sean", "Anna G."],
+            ["Sean", "Jara"],
+            ["Sean", "Tais"],
+            
+            // Luc (nicht mit Tim, William, Jacob, Anna P., Anna G., Jara, Tais)
+            ["Luc", "Tim"],
+            ["Luc", "William"],
+            ["Luc", "Jacob"],
+            ["Luc", "Anna P."],
+            ["Luc", "Anna G."],
+            ["Luc", "Jara"],
+            ["Luc", "Tais"],
+            
+            // Anna G. (nicht mit Ellison, Tim, Jacob, William)
+            ["Anna G.", "Ellison"],
+            ["Anna G.", "Tim"],
+            ["Anna G.", "Jacob"],
+            ["Anna G.", "William"],
+            
+            // Anna P. (nicht mit Ellison, Tim, Jacob)
+            ["Anna P.", "Ellison"],
+            ["Anna P.", "Tim"],
+            ["Anna P.", "Jacob"],
+            
+            // Jara (nicht mit Ellison, William, Tim, Jacob)
+            ["Jara", "Ellison"],
+            ["Jara", "William"],
+            ["Jara", "Tim"],
+            ["Jara", "Jacob"],
+        ];
+
+        // --- GLOBALER SPIELSTATUS ---
+        let gameState = 'guess'; // 'guess' oder 'room'
+
+        // --- GUESS GAME STATUS ---
+        let currentTarget = null;
         let currentStreak = 0;
         let displayName = "";
-        let availableTips = [];            // Tipps, die noch nicht aufgedeckt wurden (Tipps 2-4)
-        let revealedTips = [];             // Tipps, die bereits aufgedeckt wurden (Tipps 1-X)
-        let hintLevel = 1;                 // 1 (Initial) bis 4 (Max 4 Tips)
-        let lastHintTime = 0;              // Timestamp der letzten Tipp-Anzeige
-        const HINT_DELAY = 30 * 1000;      // 30 Sekunden in Millisekunden
+        let availableTips = [];
+        let revealedTips = [];
+        let hintLevel = 1;
+        let lastHintTime = 0;
+        const HINT_DELAY = 30 * 1000;
         let timerInterval = null;
+        
+        // --- ROOM GAME STATUS ---
+        let rooms = []; // [{ id: 'room-1', size: 4, occupants: [] }, ...]
+        let sickPersons = [];
+        let roomProblemIds = []; // Zum Speichern der Problemzimmer nach der Bewertung
 
-        // --- LOCALSTORAGE-FUNKTIONEN ---
+        // --- LOCALSTORAGE-FUNKTIONEN (GUESS GAME) ---
 
         function loadScore() {
             const storedStreak = localStorage.getItem('guessGameStreak');
@@ -161,39 +395,6 @@
             localStorage.setItem('guessGameStreak', currentStreak.toString());
         }
 
-        function resetScore() {
-            clearInterval(timerInterval); // Timer stoppen
-            currentStreak = 0;
-            saveScore();
-            startGame(true); // Starte eine neue Runde
-            showMessage("Dein Streak wurde zurückgesetzt.");
-        }
-
-        // --- UTILITY-FUNKTIONEN ---
-
-        function getRandomTarget() {
-            const randomIndex = Math.floor(Math.random() * NAME_POOL.length);
-            const targetPerson = NAME_POOL[randomIndex];
-
-            // Tipps mischen (Fisher-Yates)
-            let tips = [...targetPerson.tips];
-            for (let i = tips.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [tips[i], tips[j]] = [tips[j], tips[i]];
-            }
-            
-            // Setze den globalen Spielstatus
-            currentTarget = { 
-                name: targetPerson.name, 
-                tips: tips // Alle 4 zufällig sortierten Tipps
-            };
-            
-            revealedTips = [currentTarget.tips[0]]; // Tipp 1 wird sofort angezeigt
-            availableTips = currentTarget.tips.slice(1); // Tipps 2, 3 und 4 sind verfügbar
-            hintLevel = 1;
-            lastHintTime = Date.now();
-        }
-
         function showMessage(text, isError = false) {
             const messageBox = document.getElementById('message-box');
             messageBox.textContent = text;
@@ -204,11 +405,309 @@
             }, 5000);
         }
 
-        // --- TIMER & UI UPDATES ---
+        // ===================================
+        // ZIMMERORDNUNGS MODUS LOGIK
+        // ===================================
+
+        function generateRoomLayout() {
+            let totalCapacity = 0;
+            const generatedRooms = [];
+            let roomId = 1;
+            const targetCapacity = CLASS_SIZE; // 20 Personen
+            const maxRooms = 20; // Sicherheitslimit
+
+            // Generiere Zimmer, bis die Gesamtkapazität die Klassengröße erreicht oder überschreitet
+            while (totalCapacity < targetCapacity && roomId <= maxRooms) {
+                // Zufällig eine Zimmergröße auswählen: [1, 2, 3, 4, 8]
+                const randomIndex = Math.floor(Math.random() * ROOM_SIZES.length);
+                const selectedSize = ROOM_SIZES[randomIndex];
+
+                generatedRooms.push({
+                    id: `room-${roomId}`,
+                    size: selectedSize,
+                    occupants: []
+                });
+                totalCapacity += selectedSize;
+                roomId++;
+            }
+            rooms = generatedRooms;
+        }
+
+        function generateSickPersons() {
+            // 1 bis 5 Personen sind krank
+            const sickCount = Math.floor(Math.random() * 5) + 1;
+            const shuffledNames = [...PERSON_NAMES].sort(() => 0.5 - Math.random());
+            sickPersons = shuffledNames.slice(0, sickCount);
+        }
+        
+        function setupRoomGame() {
+            generateRoomLayout();
+            generateSickPersons();
+            // Stellt sicher, dass bei einem Neustart alle Personen als unzugewiesen gelten
+            rooms.forEach(room => room.occupants = []);
+            roomProblemIds = [];
+            renderRoomGame();
+        }
+        
+        function renderRoomGame() {
+            // Gesamtkapazität der generierten Zimmer
+            const totalCapacity = rooms.reduce((sum, room) => sum + room.size, 0);
+            
+            // Finde alle Personen, die aktuell in Zimmern sind
+            const assignedPersons = rooms.flatMap(r => r.occupants);
+            const unassignedNames = PERSON_NAMES.filter(name => !assignedPersons.includes(name));
+
+            document.getElementById('total-rooms').textContent = rooms.length;
+            document.getElementById('total-capacity').textContent = totalCapacity;
+            document.getElementById('used-capacity').textContent = assignedPersons.length;
+            document.getElementById('sick-count').textContent = sickPersons.length;
+            document.getElementById('sick-list').textContent = sickPersons.join(', ');
+
+            // Rendere Unzugewiesene Personen
+            const unassignedContainer = document.getElementById('unassigned-persons');
+            unassignedContainer.innerHTML = '';
+            
+            unassignedNames.forEach(name => {
+                const isSick = sickPersons.includes(name);
+                const color = isSick ? 'bg-red-400' : 'bg-indigo-500';
+                const tag = `
+                    <span id="person-${name}" 
+                          draggable="true" 
+                          data-name="${name}" 
+                          data-sick="${isSick}"
+                          class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${color} shadow-sm transition hover:shadow-lg">
+                        ${name} ${isSick ? '🤒' : ''}
+                    </span>
+                `;
+                unassignedContainer.innerHTML += tag;
+            });
+
+            document.getElementById('unassigned-count').textContent = unassignedNames.length;
+            
+            // Rendere Zimmer
+            const roomLayoutContainer = document.getElementById('room-layout');
+            roomLayoutContainer.innerHTML = '';
+            
+            rooms.forEach((room, index) => {
+                const problemClass = roomProblemIds.includes(room.id) ? 'border-red-500 bg-red-50' : 'border-indigo-300 bg-white';
+                const occupantsHTML = room.occupants.map(name => {
+                    const isSick = sickPersons.includes(name);
+                    const color = isSick ? 'bg-red-400' : 'bg-indigo-500';
+                    return `
+                        <span id="person-${name}" 
+                              draggable="true" 
+                              data-name="${name}" 
+                              data-sick="${isSick}"
+                              class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${color} shadow-sm transition hover:shadow-lg">
+                            ${name} ${isSick ? '🤒' : ''}
+                        </span>
+                    `;
+                }).join('');
+
+                const roomHTML = `
+                    <div id="${room.id}" 
+                         data-room-id="${room.id}"
+                         data-size="${room.size}"
+                         class="drop-zone p-4 rounded-xl ${problemClass} flex flex-wrap gap-2 transition duration-200">
+                        <h4 class="w-full text-sm font-bold text-gray-700 mb-1">Zimmer ${index + 1} (${room.size}er) - Belegt: ${room.occupants.length} / ${room.size}</h4>
+                        ${room.occupants.length === 0 ? '<p class="text-gray-400 text-sm italic">Personen hierher ziehen...</p>' : occupantsHTML}
+                    </div>
+                `;
+                roomLayoutContainer.innerHTML += roomHTML;
+            });
+            
+            // Initialisiere Drag and Drop (Muss nach dem Rendern erfolgen)
+            initDragAndDrop();
+            
+            // Ergebnis-Bereich verstecken, wenn keine Bewertung vorliegt
+            if (roomProblemIds.length === 0) {
+                 document.getElementById('room-results').style.display = 'none';
+            }
+        }
+
+        function initDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable-person');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            draggables.forEach(person => {
+                person.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', e.target.dataset.name);
+                    // Füge eine Klasse hinzu, um anzuzeigen, dass das Element gezogen wird
+                    setTimeout(() => person.classList.add('opacity-50'), 0);
+                });
+
+                person.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('opacity-50');
+                });
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', (e) => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    
+                    const personName = e.dataTransfer.getData('text/plain');
+                    const droppedOnRoomId = zone.id.startsWith('room-') ? zone.id : 'unassigned-persons';
+                    
+                    // Finde die Person und entferne sie aus ihrem aktuellen Zimmer
+                    let personRemoved = false;
+                    rooms.forEach(room => {
+                        const index = room.occupants.indexOf(personName);
+                        if (index > -1) {
+                            room.occupants.splice(index, 1);
+                            personRemoved = true;
+                        }
+                    });
+
+                    // Füge die Person dem neuen Zimmer oder der Unzugewiesen-Liste hinzu
+                    if (droppedOnRoomId !== 'unassigned-persons') {
+                        const targetRoom = rooms.find(r => r.id === droppedOnRoomId);
+                        if (targetRoom && targetRoom.occupants.length < targetRoom.size) {
+                            targetRoom.occupants.push(personName);
+                        } else if (targetRoom) {
+                             showMessage(`Zimmer ${targetRoom.id.replace('room-', '')} ist bereits voll (${targetRoom.size}er).`, true);
+                        }
+                    }
+
+                    // Rendere das Spiel neu, um die Änderungen anzuzeigen
+                    renderRoomGame();
+                });
+            });
+        }
+
+        function evaluateRooms() {
+            roomProblemIds = [];
+            const results = [];
+            let allAssigned = true;
+            
+            // 1. Check, ob alle zugewiesen sind
+            const assignedCount = rooms.reduce((sum, room) => sum + room.occupants.length, 0);
+            const totalCapacity = rooms.reduce((sum, room) => sum + room.size, 0);
+
+            // Update Statusanzeige
+            document.getElementById('used-capacity').textContent = assignedCount;
+            
+            if (assignedCount !== CLASS_SIZE) {
+                results.push(`Es sind noch ${CLASS_SIZE - assignedCount} Personen unzugewiesen! Alle müssen ein Zimmer haben.`);
+                allAssigned = false;
+            }
+
+            // 2. Check der Zimmer-Regeln
+            rooms.forEach(room => {
+                let roomProblem = false;
+                const occupants = room.occupants;
+                
+                // Ignoriere leere Zimmer
+                if (occupants.length === 0) return;
+                
+                // Kapazitäts-Check (sollte durch D&D verhindert werden, aber zur Sicherheit)
+                if (occupants.length > room.size) {
+                    roomProblem = true;
+                    // Diese Nachricht sollte eigentlich nie kommen wegen D&D-Logik
+                    results.push(`Problem im Zimmer ${room.id.replace('room-', '')}: Überbelegung (${occupants.length} von ${room.size}).`); 
+                }
+
+                // Regel A: Krankheits-Isolation
+                const sickInRoom = occupants.filter(name => sickPersons.includes(name));
+                const healthyInRoom = occupants.length - sickInRoom.length;
+                
+                if (sickInRoom.length > 0 && healthyInRoom > 0) {
+                    roomProblem = true;
+                }
+
+                // Regel B: Soziale Konflikte
+                for (let i = 0; i < occupants.length; i++) {
+                    for (let j = i + 1; j < occupants.length; j++) {
+                        const personA = occupants[i];
+                        const personB = occupants[j];
+                        
+                        // Check, ob das Paar in der Konfliktliste ist (unabhängig von der Reihenfolge)
+                        const isConflict = CONFLICT_PAIRS.some(pair => 
+                            (pair[0] === personA && pair[1] === personB) || 
+                            (pair[0] === personB && pair[1] === personA)
+                        );
+                        
+                        if (isConflict) {
+                            roomProblem = true;
+                        }
+                    }
+                }
+
+                if (roomProblem) {
+                    roomProblemIds.push(room.id);
+                }
+            });
+            
+            // Nur eindeutige Problemzimmer-IDs speichern
+            roomProblemIds = [...new Set(roomProblemIds)];
+
+            // 3. Ausgabe des Ergebnisses
+            const resultContainer = document.getElementById('room-results');
+            const resultText = document.getElementById('room-result-text');
+
+            if (results.length === 0 && allAssigned && roomProblemIds.length === 0) {
+                resultContainer.className = 'mt-6 p-4 border border-green-500 bg-green-100 rounded-xl';
+                resultText.innerHTML = '<span class="font-semibold">Perfekt!</span> Die Zimmerordnung ist für alle in Ordnung. Weiter so!';
+            } else {
+                resultContainer.className = 'mt-6 p-4 border border-red-500 bg-red-100 rounded-xl';
+                let output = 'Es gibt Probleme in deiner Zimmerordnung:';
+                output += '<ul class="list-disc ml-5 mt-2 space-y-1">';
+                
+                // A) Probleme in spezifischen Zimmern (Soziale und Isolationskonflikte)
+                if (roomProblemIds.length > 0) {
+                    output += `<li class="font-semibold">Probleme gefunden in den Zimmern: ${roomProblemIds.map(id => id.replace('room-', '')).join(', ')}.</li>`;
+                    output += `<li class="text-xs text-red-700">Ursache: Mische keine Kranken/Gesunden oder habe soziale Konfliktpaare im selben Zimmer.</li>`;
+                }
+                
+                // B) Generelle Fehler (z.B. nicht alle zugewiesen)
+                if (!allAssigned) {
+                    output += `<li>Es sind nicht alle ${CLASS_SIZE} Personen zugewiesen. Es fehlen noch ${CLASS_SIZE - assignedCount} Personen.</li>`;
+                }
+                
+                output += '</ul>';
+                resultText.innerHTML = output;
+            }
+            
+            resultContainer.style.display = 'block';
+            renderRoomGame(); // Rendere neu, um die Fehlerfarben anzuzeigen
+        }
+
+        // ===================================
+        // GUESS GAME LOGIK (Unverändert)
+        // ===================================
+
+        function getRandomTarget() {
+            const randomIndex = Math.floor(Math.random() * NAME_POOL_GUESS.length);
+            const targetPerson = NAME_POOL_GUESS[randomIndex];
+
+            let tips = [...targetPerson.tips];
+            for (let i = tips.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tips[i], tips[j]] = [tips[j], tips[i]];
+            }
+            
+            currentTarget = { 
+                name: targetPerson.name, 
+                tips: tips
+            };
+            
+            revealedTips = [currentTarget.tips[0]];
+            availableTips = currentTarget.tips.slice(1);
+            hintLevel = 1;
+            lastHintTime = Date.now();
+        }
         
         function updateTimerAndHintButton() {
             const btn = document.getElementById('request-hint-btn');
-            const timeSpan = document.getElementById('time-remaining');
             
             if (hintLevel >= 4) {
                 clearInterval(timerInterval);
@@ -236,83 +735,40 @@
         }
         
         function startTimer() {
-            clearInterval(timerInterval); // Sicherstellen, dass nur ein Timer läuft
+            clearInterval(timerInterval);
             timerInterval = setInterval(updateTimerAndHintButton, 1000);
-            updateTimerAndHintButton(); // Sofortiger Update
+            updateTimerAndHintButton();
         }
 
-        // --- SPIEL-LOGIK ---
-
         function requestHint() {
-            if (hintLevel >= 4) { 
-                return showMessage("Alle verfügbaren Tipps wurden bereits angezeigt.", true);
-            }
-            
+            if (hintLevel >= 4) return showMessage("Alle verfügbaren Tipps wurden bereits angezeigt.", true);
             const timeElapsed = Date.now() - lastHintTime;
-            if (timeElapsed < HINT_DELAY) {
-                return; // Button ist ohnehin deaktiviert, sollte nicht passieren.
-            }
+            if (timeElapsed < HINT_DELAY) return;
 
             if (availableTips.length > 0) {
                 const nextTip = availableTips.shift();
                 revealedTips.push(nextTip);
                 hintLevel++;
-                lastHintTime = Date.now(); // Timer zurücksetzen
-                renderGameScreen();
+                lastHintTime = Date.now();
+                renderGuessGame();
                 showMessage(`Tipp ${hintLevel} wurde hinzugefügt.`);
             }
         }
 
-
-        function startGame(isNewRound = false) {
-            if (!isNewRound) {
-                loadScore(); // Lade Streak und Name beim ersten Start
-            }
-            
-            getRandomTarget(); // Setzt currentTarget und alle Hint-States zurück
-            
-            renderGameScreen();
-            startTimer();
-            
-            // Event Listener für Namensänderung
-            document.getElementById('display-name').value = displayName;
-            document.getElementById('display-name').oninput = (e) => {
-                displayName = e.target.value.trim();
-                localStorage.setItem('guessGameDisplayName', displayName);
-            };
-            
-            // Event Listener für Raten & Reset
-            document.getElementById('submit-guess-btn').onclick = submitGuess;
-            document.getElementById('reset-game-btn').onclick = resetScore;
-            document.getElementById('request-hint-btn').onclick = requestHint;
-            
-            // Datalist befüllen
-            const nameOptionsHTML = NAME_POOL.map(item => 
-                `<option value="${item.name}">${item.name}</option>`
-            ).join('');
-            document.getElementById('name-options').innerHTML = nameOptionsHTML;
-        }
-
-        function renderGameScreen() {
+        function renderGuessGame() {
             document.getElementById('current-streak').textContent = currentStreak;
-
-            // Anzeigen der aufgedeckten Tipps
             const hintList = document.getElementById('hint-list');
-            hintList.innerHTML = revealedTips.map((tip, index) => 
+            hintList.innerHTML = revealedTips.map(tip => 
                 `<p class="hint-item">${tip}</p>`
             ).join('');
-            
-            document.getElementById('guess-input').value = ''; // Eingabefeld leeren
-            
-            // Aktualisiere den Button-Zustand sofort
+            document.getElementById('guess-input').value = '';
             updateTimerAndHintButton();
         }
 
         function submitGuess() {
-            const guessInput = document.getElementById('guess-input');
-            const userGuess = guessInput.value.trim();
-            
-            const validNames = NAME_POOL.map(n => n.name.toLowerCase());
+            const userGuess = document.getElementById('guess-input').value.trim();
+            const validNames = NAME_POOL_GUESS.map(n => n.name.toLowerCase());
+
             if (!validNames.includes(userGuess.toLowerCase())) {
                 return showMessage("Ungültiger Name. Wähle einen Namen aus der Liste.", true);
             }
@@ -328,13 +784,88 @@
                 showMessage(`Falsch! Der Streak wurde zurückgesetzt. Der gesuchte Name war ${targetName}.`, true);
             }
 
-            // Status speichern und neue Runde starten
             saveScore();
-            startGame(true); 
+            initGuessGame(true);
         }
 
-        // --- APP START ---
-        window.onload = startGame;
+        function resetGuessScore() {
+            clearInterval(timerInterval);
+            currentStreak = 0;
+            saveScore();
+            initGuessGame(true);
+            showMessage("Dein Streak wurde zurückgesetzt.");
+        }
+        
+        function initGuessGame(isNewRound = false) {
+            if (!isNewRound) {
+                loadScore();
+            }
+            getRandomTarget();
+            renderGuessGame();
+            startTimer();
+        }
+
+        // ===================================
+        // ALLGEMEINE INITIALISIERUNG
+        // ===================================
+
+        function switchMode(mode) {
+            gameState = mode;
+            const guessDiv = document.getElementById('guess-game');
+            const roomDiv = document.getElementById('room-game');
+            const guessBtn = document.getElementById('switch-guess');
+            const roomBtn = document.getElementById('switch-room');
+            
+            if (mode === 'guess') {
+                guessDiv.style.display = 'block';
+                roomDiv.style.display = 'none';
+                guessBtn.classList.add('bg-indigo-500', 'text-white', 'shadow-md');
+                guessBtn.classList.remove('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
+                roomBtn.classList.remove('bg-indigo-500', 'text-white', 'shadow-md');
+                roomBtn.classList.add('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
+                initGuessGame();
+            } else {
+                guessDiv.style.display = 'none';
+                roomDiv.style.display = 'block';
+                roomBtn.classList.add('bg-indigo-500', 'text-white', 'shadow-md');
+                roomBtn.classList.remove('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
+                guessBtn.classList.remove('bg-indigo-500', 'text-white', 'shadow-md');
+                guessBtn.classList.add('border', 'border-indigo-500', 'text-indigo-700', 'hover:bg-indigo-50');
+                clearInterval(timerInterval); // Ratespiel-Timer stoppen
+                setupRoomGame();
+            }
+        }
+        
+        function initializeApp() {
+            // Initialisiere Guess Game Listeners
+            document.getElementById('display-name').value = displayName;
+            document.getElementById('display-name').oninput = (e) => {
+                displayName = e.target.value.trim();
+                localStorage.setItem('guessGameDisplayName', displayName);
+            };
+            document.getElementById('submit-guess-btn').onclick = submitGuess;
+            document.getElementById('reset-game-btn').onclick = resetGuessScore;
+            document.getElementById('request-hint-btn').onclick = requestHint;
+            
+            // Befülle Datalist
+            const nameOptionsHTML = PERSON_NAMES.map(item => 
+                `<option value="${item}">${item}</option>`
+            ).join('');
+            document.getElementById('name-options').innerHTML = nameOptionsHTML;
+            
+            // Initialisiere Room Game Listeners
+            document.getElementById('submit-rooms-btn').onclick = evaluateRooms;
+            document.getElementById('new-room-game-btn').onclick = setupRoomGame;
+
+            // Initialisiere Mode Switcher
+            document.getElementById('switch-guess').onclick = () => switchMode('guess');
+            document.getElementById('switch-room').onclick = () => switchMode('room');
+            
+            // Starte standardmässig mit dem Ratespiel
+            switchMode('guess');
+        }
+
+        window.onload = initializeApp;
     </script>
 </body>
 </html>
