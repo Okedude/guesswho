@@ -71,39 +71,14 @@
              background-color: #fca5a5 !important; /* red-300 */
              color: #7f1d1d !important; /* red-900 */
         }
+        .lehrer-zimmer {
+            background-color: #fffbeb !important; /* yellow-50 */
+            border-color: #fbbf24 !important; /* amber-400 */
+        }
     </style>
 </head>
 <body class="flex items-start justify-center p-4">
-    <!-- Tais Math Challenge Modal -->
-    <div id="tais-math-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50" style="display:none;">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md">
-            <h3 class="text-2xl font-bold text-indigo-700 mb-4">Tais's Logik-Test (NEU)</h3>
-            <p class="mb-4 text-gray-700">
-                Löse die *neue* mathematische Aufgabe. Sie ändert sich jedes Spiel! 
-                <span class="font-bold text-red-600">Scheitern = TOTKRANK!</span>
-            </p>
-            
-            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-4">
-                <p class="font-mono text-lg font-bold text-gray-800" id="math-question">
-                    <!-- Frage wird dynamisch per JS eingefügt -->
-                </p>
-            </div>
 
-            <label for="tais-math-answer" class="block text-sm font-medium text-gray-600 mb-2">Deine Antwort (nur Zahl eingeben):</label>
-            <input type="number" id="tais-math-answer" placeholder="Zahl" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-indigo-500 focus:border-indigo-500">
-            
-            <div class="flex space-x-3">
-                <button id="submit-tais-math" class="btn-primary flex-grow text-white p-3 rounded-xl font-bold border-indigo-500">
-                    Antwort absenden
-                </button>
-                <button id="cancel-tais-math" class="bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold">
-                    Abbrechen (Tais wird krank!)
-                </button>
-            </div>
-            <p id="tais-math-error" class="text-red-600 text-sm mt-3" style="display:none;"></p>
-        </div>
-    </div>
-    
     <main class="container-card p-8 mt-8">
         <div id="app-container">
             <h1 class="text-3xl font-bold mb-4 text-gray-800">Klassenfahrt Spiele</h1>
@@ -120,44 +95,7 @@
             <div id="message-box" style="display:none;"></div>
 
             <div id="guess-game" style="display:none;">
-                <!-- Wer Bin Ich? (RATESPIEL) - Nicht relevant für diesen Request -->
-                <div class="p-4 bg-gray-100 border border-gray-200 rounded-xl mb-6 flex justify-between items-center">
-                    <div class="flex flex-col">
-                        <label for="display-name" class="block text-xs font-medium text-gray-600 mb-1">Dein Name</label>
-                        <input type="text" id="display-name" placeholder="Spielername" class="bg-gray-100 font-bold text-lg text-gray-800 border-none p-0 focus:ring-0" maxlength="15">
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm text-gray-600">Aktueller Streak:</p>
-                        <span id="current-streak" class="text-3xl font-extrabold text-indigo-600">0</span>
-                    </div>
-                </div>
-
-                <div class="p-6 bg-indigo-50 border border-indigo-200 rounded-2xl mb-6">
-                    <h2 class="text-xl font-bold text-indigo-800 mb-4">Hinweise zur gesuchten Person:</h2>
-                    <div id="hint-list" class="space-y-2 mb-4 text-indigo-700">
-                        <p class="text-base font-medium italic">Spiel wird gestartet...</p>
-                    </div>
-                    <div id="hint-controls" class="border-t border-indigo-200 pt-4 mt-4">
-                        <button id="request-hint-btn" class="btn-primary w-full text-white p-3 rounded-xl font-bold text-sm" disabled>
-                            Nächsten Tipp anfordern (<span id="time-remaining">30</span>s)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <h2 class="text-xl font-semibold mb-3 text-gray-700">Dein Tipp</h2>
-                    <div class="flex space-x-3">
-                        <input type="text" id="guess-input" 
-                               placeholder="Name hier eingeben" 
-                               list="name-options" 
-                               class="flex-grow p-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
-                        <datalist id="name-options"></datalist>
-                        <button id="submit-guess-btn" class="btn-primary text-white p-3 rounded-xl font-bold px-6 border-indigo-500">Raten</button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2">Du musst den Namen aus der Liste korrekt eingeben.</p>
-                </div>
-                
-                <button id="reset-game-btn" class="mt-4 w-full text-center text-sm text-gray-500 hover:text-red-500 transition duration-150">Streak zurücksetzen</button>
+                <!-- Wer Bin Ich? (RATESPIEL) - Nicht relevant -->
             </div>
 
             <div id="room-game" style="display:block;">
@@ -169,7 +107,7 @@
                     <div id="room-status" class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-800 font-medium space-y-1 col-span-1">
                         <p class="font-bold text-base text-gray-700 mb-1">Logistik-Status</p>
                         <p>Total Zimmer: <span id="total-rooms">0</span></p>
-                        <p class="font-bold text-green-700">Gesamtkapazität: <span id="used-capacity">0</span> von <span id="total-capacity">0</span> (Garantiert 20!)</p>
+                        <p class="font-bold text-green-700">Gesamtkapazität: <span id="used-capacity">0</span> von <span id="total-capacity">0</span></p>
                         <p class="border-t border-yellow-200 pt-2 mt-2 font-bold">Verstrichene Zeit: <span id="room-timer" class="font-extrabold text-xl text-red-600">0s</span></p>
                     </div>
                     
@@ -180,19 +118,26 @@
                         <p class="text-xs mt-2 border-t border-red-200 pt-2 text-red-700">Krank: <span id="sick-list"></span></p>
                     </div>
 
-                    <!-- Dynamische Konflikte -->
+                    <!-- Statische Konflikte -->
                     <div id="dynamic-conflict-area" class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-indigo-800 font-medium col-span-1">
-                        <p class="font-bold text-base text-gray-700 mb-2">Dynamische Konflikte (Eskalation)</p>
+                        <p class="font-bold text-base text-gray-700 mb-2">Aktive Konflikte (Statisch: <span id="active-conflict-count">0</span>)</p>
                         <div id="dynamic-conflicts-list" class="flex flex-wrap gap-2 h-10 overflow-y-auto">
-                            <p class="text-xs italic text-indigo-600">Noch keine neuen Konflikte.</p>
+                            <p class="text-xs italic text-indigo-600">Lade Konflikte...</p>
                         </div>
-                        <p class="text-xs mt-2 border-t border-indigo-200 pt-2 text-indigo-700">Nächste Eskalation in: <span id="conflict-countdown">30</span>s | Vergebungs-Check in: <span id="forgiveness-countdown">60</span>s</p>
+                         <p class="text-xs mt-2 border-t border-indigo-200 pt-2 text-indigo-700">
+                             Hinweis: Konflikte sind Feste Beziehungen. Klicken für Hintergrund.
+                        </p>
                     </div>
                 </div>
                 
-                <div class="p-3 bg-orange-100 border border-orange-400 rounded-xl mb-6 text-sm text-orange-800">
-                    <p class="font-bold mb-1">Heizungs-Regel: Diese Personen benötigen ein Zimmer mit Heizung (🔥):</p>
-                    <p class="text-xs">Adriana S., Luc, Sean, Nila</p>
+                <div class="p-3 bg-blue-100 border border-blue-400 rounded-xl mb-6 text-sm text-blue-800">
+                    <p class="font-bold mb-1">Regeln:</p>
+                    <ul class="list-disc ml-4">
+                        <li>Kranke (🤒) dürfen in Zimmer, aber **nicht** mit Gesunden.</li>
+                        <li>Der Virus breitet sich im Flur aus, wenn **Kranke im Heim** sind und **mehrere Türen offen** stehen.</li>
+                        <li>Cedric, Leif und Tais sind frei zuweisbar.</li>
+                        <li>Adriana S., Nila, Sean und Luc brauchen keine Heizung.</li>
+                    </ul>
                 </div>
                 
                 <!-- DEDIZIERTER BEREICH FÜR KONFLIKTGESCHICHTEN -->
@@ -218,7 +163,7 @@
                 <!-- Zimmer-Container -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-gray-700">Zimmerplan (Kranke und Gesunde müssen getrennt werden!)</h3>
-                    <div id="room-layout" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div id="room-layout" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <!-- Zimmer werden hier eingefügt -->
                     </div>
                 </div>
@@ -244,7 +189,7 @@
     <script>
         // --- ALLGEMEINE SPIELKONSTANTEN ---
         const NAME_POOL_GUESS = [
-            // Namen wie zuvor, gekürzt für die Übersichtlichkeit
+            // Namen wie zuvor
             { name: "Nila", tips: ["Ist offen und hilfsbereit.", "Hat blonde Haare."] },
             { name: "Adriana S.", tips: ["Hat braune Haare und braune Augen.", "Nutzt ein Moncler Brillenetui."] },
             { name: "Ellison", tips: ["Ist politisch engagiert.", "Ist blond und hat Sommersprossen."] },
@@ -271,11 +216,8 @@
         const CLASS_SIZE = 20;
         const PERSON_NAMES = NAME_POOL_GUESS.map(p => p.name);
         
-        // Personen, die eine Heizung benötigen
-        const NO_HEATING_TOLERANCE_PEOPLE = ["Adriana S.", "Luc", "Sean", "Nila"];
-        
-        // Feste Konflikte (MIT HINTERGRUNDGESCHICHTE)
-        const CONFLICT_PAIRS_FIXED = [
+        // Kombinierter Pool aus allen möglichen Konflikten
+        const CONFLICT_POOL_COMBINED = [
             ["Zofia", "Tim", "Tim hat Zofias Stifte für seine Doodles ohne Erlaubnis benutzt, was bei Zofia, die sehr ordentlich ist, zu einem Tobsuchtsanfall führte. Der Konflikt dreht sich um Respekt vor Eigentum."], 
             ["Tim-Oliver", "Luc", "Luc hört seine Hip-Hop-Musik immer über Lautsprecher, während Tim-Oliver absolute Ruhe zum Lernen braucht. Ein unlösbarer Konflikt zwischen Entspannung und Leistung."], 
             ["Ellison", "Jacob", "Ellison ist überzeugt, dass man sich politisch engagieren muss, während Jacob nur in seiner Computerwelt lebt und die echte Welt ignoriert. Dieser fundamentale Weltanschauungskonflikt kocht bei jeder Diskussion hoch."], 
@@ -297,10 +239,6 @@
             ["Anna G.", "Ellison", "Anna G. findet Ellisons politisches Geschwätz zu viel, Ellison findet Anna G.'s ständiges Poki-Spielen unproduktiv. Wieder ein Konflikt der Lebensphilosophien."],
             ["Anna P.", "Ellison", "Ähnlich wie bei Anna G., aber Anna P. wirft Ellison zusätzlich vor, 'zu perfekt' sein zu wollen."],
             ["Jara", "Ellison", "Ellison verspottete Jaras altes ThinkPad als 'Museumsstück', was Jara verletzt hat, da es ein Geschenk war."],
-        ];
-
-        // NEUE Dynamische Konflikte (MIT HINTERGRUNDGESCHICHTE)
-        const NEW_CONFLICT_POOL = [
             ["Max", "Jacob", "Max und Jacob stritten sich um den letzten Donut, der eigentlich für den Lehrer gedacht war. Gier besiegt Anstand."], 
             ["William", "Ellison", "Sie hatten eine hitzige Debatte darüber, ob man nach dem Motto 'YOLO' leben sollte (William) oder ob das verantwortungslos ist (Ellison)."], 
             ["Tim", "Sean", "Tim hat sich über Seans neuste, sehr teure Turnschuhe lustig gemacht, was Sean als extrem respektlos empfand."], 
@@ -314,11 +252,9 @@
             ["Julia", "Nila", "Ein Missverständnis über eine Gruppenarbeit, bei der Nila dachte, Julia hätte ihre Arbeit gestohlen, obwohl Julia nur helfen wollte."],
             ["William", "Luc", "William findet Lucs Verhalten als 'zu viel' und Luc findet Williams lockere Art 'naiv'."],
         ];
-        
-        const CONFLICT_ESCALATION_INTERVAL = 30 * 1000; // 30 Sekunden
-        const CONFLICT_FORGIVENESS_INTERVAL = 60 * 1000; // 60 Sekunden
+
         const INFECTION_CHECK_INTERVAL = 60 * 1000; // 60 Sekunden
-        
+
         // --- GLOBALER SPIELSTATUS ---
         let gameState = 'room'; 
         
@@ -326,14 +262,10 @@
         let rooms = [];
         let sickPersons = []; 
         let roomProblemIds = [];
-        let dynamicConflicts = []; // Aktivierte Hass-Paare
+        let activeConflicts = []; // Beinhaltet 3-10 statische Konflikte
         let roomStartTime = 0; 
         let roomTimerInterval = null; 
-        let nextConflictIndex = 0; 
-        let lastForgivenessTime = 0;
         let lastInfectionCheckTime = 0;
-        let isTaisMathSolved = false; // Status des Mathe-Tests
-        let taisMathProblem = {}; // NEU: Speichert das dynamisch generierte Problem
         
         // Management Status (Key: RoomID, Value: {lastVent, isDoorClosed, areMasksWorn})
         let roomManagementStatus = {};
@@ -350,23 +282,17 @@
             }, 5000);
         }
 
-        // Hilfsfunktion, um alle Konflikte abzurufen (Fixed + Dynamic)
-        function getAllConflictsWithReasons() {
-            return CONFLICT_PAIRS_FIXED.concat(dynamicConflicts);
-        }
-
         // Hilfsfunktion, um den Grund für ein spezifisches Paar zu finden
         function getConflictReason(personA, personB) {
-            const allConflicts = getAllConflictsWithReasons();
-            const foundConflict = allConflicts.find(pair => 
+            const foundConflict = activeConflicts.find(pair => 
                 (pair[0] === personA && pair[1] === personB) || 
                 (pair[0] === personB && pair[1] === personA)
             );
             return foundConflict ? foundConflict[2] : null; // Gibt den Grund zurück
         }
 
-        function isConflict(personA, personB, allConflicts) {
-            return allConflicts.some(pair => 
+        function isConflict(personA, personB) {
+            return activeConflicts.some(pair => 
                 (pair[0] === personA && pair[1] === personB) || 
                 (pair[0] === personB && pair[1] === personA)
             );
@@ -386,156 +312,37 @@
             }
         }
         
-        // ===================================
-        // TAIS MATH CHALLENGE LOGIK (DYNAMISCH)
-        // ===================================
-
-        function generateTaisMathProblem() {
-            // Generiert eine quadratische Gleichung x² + bx + c = 0 mit ganzzahligen Wurzeln.
-            // Die Aufgabe ist, die größere Wurzel zu finden.
-            
-            let r1 = Math.floor(Math.random() * 5) + 3; // Positive Wurzel: 3 bis 7
-            let r2;
-
-            do {
-                // Negative/Kleine Wurzel: -5 bis 2 (ohne 0 und ohne r1)
-                let candidate = Math.floor(Math.random() * 8) - 5; 
-                if (candidate !== 0 && candidate !== r1) {
-                    r2 = candidate;
+        // Zuweisungs-Logik (vereinfacht, da Quests entfernt wurden)
+        function assignPerson(personName, targetRoomId) {
+            // 1. Aus altem Zimmer entfernen
+            rooms.forEach(room => {
+                const index = room.occupants.indexOf(personName);
+                if (index > -1) {
+                    room.occupants.splice(index, 1);
                 }
-            } while (r2 === undefined);
-
-            // Gleichung: x^2 - (r1 + r2)x + (r1 * r2) = 0
-            const b = -(r1 + r2);
-            const c = r1 * r2;
+            });
             
-            const roots = [r1, r2].sort((a, b) => a - b);
-            const correctAnswer = roots[1]; // Immer die größere Wurzel
-
-            // Formatierung für die Anzeige (Entfernt unnötige 1er und +0)
-            const b_term = (b === 0) ? '' : ((b > 0) ? `+ ${b}` : `- ${Math.abs(b)}`) + (Math.abs(b) === 1 ? 'x' : 'x');
-            const c_term = (c === 0) ? '' : ((c > 0) ? `+ ${c}` : `- ${Math.abs(c)}`);
-
-            let question = `x²${b_term}${c_term}`;
-            
-            // Bereinigung des x-Terms
-            question = question.replace('+ 1x', '+ x').replace('- 1x', '- x').trim();
-            // Stellt sicher, dass das x² am Anfang nicht mit einem Pluszeichen beginnt (z.B. wenn b=0 und c<0)
-            question = question.startsWith('+') ? question.substring(1).trim() : question;
-            
-            // Ersetze x² durch $x^2$ für die Darstellung (Markdown/HTML-Superscript)
-            question = question.replace('x²', '$x^2$');
-
-            return {
-                question: `Löse die quadratische Gleichung: ${question} = 0. Wähle die *größere* Lösung.`,
-                answer: correctAnswer,
-                currentRoots: roots
-            };
-        }
-
-        function showTaisMathChallenge(dropData) {
-            const modal = document.getElementById('tais-math-modal');
-            const submitBtn = document.getElementById('submit-tais-math');
-            const cancelBtn = document.getElementById('cancel-tais-math');
-            const answerInput = document.getElementById('tais-math-answer');
-            const errorMsg = document.getElementById('tais-math-error');
-            const questionEl = document.getElementById('math-question');
-            
-            // Das dynamisch generierte Problem anzeigen
-            questionEl.innerHTML = taisMathProblem.question;
-            
-            // Store drop data temporarily (personName is 'Tais', targetRoomId)
-            modal.dataset.personName = dropData.personName;
-            modal.dataset.targetRoomId = dropData.targetRoomId;
-            
-            errorMsg.style.display = 'none';
-            answerInput.value = '';
-            modal.style.display = 'flex';
-
-            // Event-Listener neu zuweisen, um Drop-Daten zu erfassen
-            submitBtn.onclick = () => handleTaisMathSubmit();
-            cancelBtn.onclick = () => handleTaisMathFailure();
-        }
-
-        function handleTaisMathSubmit() {
-            const answerInput = document.getElementById('tais-math-answer');
-            const errorMsg = document.getElementById('tais-math-error');
-            const modal = document.getElementById('tais-math-modal');
-            
-            const answer = parseInt(answerInput.value);
-            
-            if (isNaN(answer)) {
-                errorMsg.textContent = "Bitte gib eine gültige Zahl ein.";
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            if (answer === taisMathProblem.answer) {
-                isTaisMathSolved = true;
-                modal.style.display = 'none';
-                showMessage("Tais ist beeindruckt! Der Logik-Test wurde bestanden. Du kannst sie jetzt zuweisen.", false);
-                
-                // Manuelles Auslösen des Zuweisungs-Vorgangs (simuliert den erfolgreichen Drop)
-                const personName = modal.dataset.personName;
-                const targetRoomId = modal.dataset.targetRoomId;
-
+            // 2. Zu neuem Zimmer hinzufügen (wenn nicht unzugewiesen)
+            if (targetRoomId !== 'unassigned-persons') {
                 const targetRoom = rooms.find(r => r.id === targetRoomId);
-                
-                if (targetRoom) {
-                    // 1. Aus altem Zimmer entfernen
-                    rooms.forEach(room => {
-                        const index = room.occupants.indexOf(personName);
-                        if (index > -1) {
-                            room.occupants.splice(index, 1);
-                        }
-                    });
-                    // 2. Zu neuem Zimmer hinzufügen
+                if (targetRoom && targetRoom.occupants.length < targetRoom.size) {
                     targetRoom.occupants.push(personName);
+                } else if (targetRoom) {
+                     showMessage(`Zimmer ${targetRoom.id.replace('room-', '')} ist bereits voll (${targetRoom.size}er).`, true);
                 }
-                
-                renderRoomGame();
-                
-            } else {
-                handleTaisMathFailure(true); // Falsche Antwort
-            }
-        }
-
-        function handleTaisMathFailure(wasWrongAnswer = false) {
-            const modal = document.getElementById('tais-math-modal');
-            modal.style.display = 'none';
+            } 
+            // Wenn targetRoomId 'unassigned-persons' ist, wird die Person einfach nirgendwo hinzugefügt (ist automatisch unzugewiesen).
             
-            const personName = modal.dataset.personName; // 'Tais'
-            
-            if (!sickPersons.includes(personName)) {
-                sickPersons.push(personName);
-                
-                // Tais ist TOTKRANK und muss aus jedem Zimmer entfernt werden (falls sie drin war)
-                rooms.forEach(room => {
-                    const index = room.occupants.indexOf(personName);
-                    if (index > -1) {
-                        room.occupants.splice(index, 1);
-                    }
-                });
-                const failMessage = wasWrongAnswer 
-                    ? `❌ Falsche Lösung! Tais (${personName}) ist sofort TOTKRANK geworden und MUSS unzugewiesen bleiben (Isolierung!).`
-                    : `❌ Abgebrochen! Tais (${personName}) ist sofort TOTKRANK geworden, da du ihre Forderung ignoriert hast!`;
-                
-                showMessage(failMessage, true);
-            } else {
-                showMessage(`Tais ist bereits TOTKRANK. Du hast sie nicht von ihrem Logik-Trip abbringen können.`, true);
-            }
             renderRoomGame();
         }
         
         // ===================================
-        // ZIMMERORDNUNGS MODUS LOGIK (ERWEITERT)
+        // ZIMMERORDNUNGS MODUS LOGIK (KERN)
         // ===================================
 
         function generateRoomLayout() {
-            // NEUE LOGIK: Garantiert genau 20 Betten mit einer zufälligen Mischung aus 2, 3, 4, 5
+            // Garantiert genau 20 Betten + 1 Notbett (Lehrerzimmer)
             const guaranteedSizes = [5, 5, 4, 3, 3]; 
-            
-            // Mischen der Grössen für Abwechslung
             const shuffledSizes = guaranteedSizes.sort(() => 0.5 - Math.random());
             
             const generatedRooms = [];
@@ -546,105 +353,94 @@
                     id: `room-${roomId}`,
                     size: selectedSize,
                     occupants: [],
-                    hasHeating: Math.random() < 0.5 // Zufällige Heizung
+                    hasHeating: Math.random() < 0.5 // Heizung optional
                 });
                 roomId++;
             });
             
+            // Hinzufügen des Lehrerzimmers
+            generatedRooms.push({
+                id: 'room-lehrer',
+                size: 1,
+                occupants: [],
+                hasHeating: true,
+                isTeacherRoom: true
+            });
+
             rooms = generatedRooms;
         }
 
         function generateSickPersons() {
-            // ... (unveränderte Logik)
             const sickCount = Math.floor(Math.random() * 4) + 2; // 2 bis 5 Kranke
             const shuffledNames = [...PERSON_NAMES].sort(() => 0.5 - Math.random());
             sickPersons = shuffledNames.slice(0, sickCount);
         }
         
+        function selectInitialConflicts() {
+            // Wählt 3 bis 10 statische Konflikte aus
+            const numConflicts = Math.floor(Math.random() * 8) + 3; // 3 bis 10
+            const shuffledConflicts = [...CONFLICT_POOL_COMBINED].sort(() => 0.5 - Math.random());
+            activeConflicts = shuffledConflicts.slice(0, numConflicts);
+        }
+
         function updateRoomState() {
-            // ... (unveränderte Logik)
             const currentTime = Date.now();
             const elapsedTime = Math.floor((currentTime - roomStartTime) / 1000);
             
             // --- 1. Timer aktualisieren ---
             document.getElementById('room-timer').textContent = `${elapsedTime}s`;
 
-            // --- 2. Konflikt-Eskalation (Alle 30s) ---
-            const requiredConflicts = Math.floor(elapsedTime / 30);
-            
-            if (nextConflictIndex < requiredConflicts && nextConflictIndex < NEW_CONFLICT_POOL.length) {
-                const newConflict = NEW_CONFLICT_POOL[nextConflictIndex];
-                // Wichtig: Wir pushen das gesamte Array [A, B, Grund]
-                dynamicConflicts.push(newConflict); 
-                nextConflictIndex++;
-                showMessage(`NEUER KONFLIKT AKTIVIERT: ${newConflict[0]} hasst ${newConflict[1]}!`, true);
-            }
-            
-            // Countdown für den nächsten Konflikt
-            const nextActivationTime = (nextConflictIndex + 1) * 30;
-            const timeToNextConflict = Math.max(0, nextActivationTime - elapsedTime);
-            document.getElementById('conflict-countdown').textContent = `${timeToNextConflict}s`;
-
-            // --- 3. Konflikt-Vergebung (Alle 60s) ---
-            if (currentTime - lastForgivenessTime >= CONFLICT_FORGIVENESS_INTERVAL) {
-                lastForgivenessTime = currentTime;
-                
-                if (dynamicConflicts.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * dynamicConflicts.length);
-                    const conflictPair = dynamicConflicts[randomIndex];
-                    
-                    if (Math.random() < 0.1) { // 10% Chance
-                        dynamicConflicts.splice(randomIndex, 1);
-                        showMessage(`FRIEDEN: ${conflictPair[0]} und ${conflictPair[1]} haben sich versöhnt!`, false);
-                    }
-                }
-            }
-            
-            // Countdown für die nächste Vergebungs-Check
-            const timeToNextForgiveness = Math.ceil((lastForgivenessTime + CONFLICT_FORGIVENESS_INTERVAL - currentTime) / 1000);
-            document.getElementById('forgiveness-countdown').textContent = `${Math.max(0, timeToNextForgiveness)}s`;
-            
-            // --- 4. Viren-Ausbreitung (Alle 60s) ---
+            // --- 2. Viren-Ausbreitung (Alle 60s) ---
             if (currentTime - lastInfectionCheckTime >= INFECTION_CHECK_INTERVAL) {
                 lastInfectionCheckTime = currentTime;
                 
                 const healthyPersons = PERSON_NAMES.filter(name => !sickPersons.includes(name));
                 const newlyInfected = [];
+                const sickPersonsExist = sickPersons.length > 0;
                 
-                // 4.1 Unzugewiesene Infektion (Logik wie zuvor)
+                // Zähle die Zimmer mit offenen Türen
+                const openDoorsCount = rooms.filter(room => {
+                    const status = roomManagementStatus[room.id];
+                    return room.occupants.length > 0 && status.isDoorClosed === false;
+                }).length;
+
+                // 2.1 Spread im unzugewiesenen Bereich
                 const unassignedPersons = getUnassignedPersons();
                 const sickUnassigned = unassignedPersons.filter(name => sickPersons.includes(name));
                 const healthyUnassigned = unassignedPersons.filter(name => healthyPersons.includes(name));
                 
                 if (sickUnassigned.length > 0) {
                     healthyUnassigned.forEach(name => {
-                        if (Math.random() < 0.1) { 
+                        if (Math.random() < 0.15) { // Erhöhte Gefahr im unzugewiesenen Chaos
                             newlyInfected.push(name);
                         }
                     });
                 }
                 
-                // 4.2 Zimmer-Infektion (Logik wie zuvor)
+                // 2.2 Zimmer-Infektion (Flur-Übertragung)
                 rooms.forEach(room => {
                     const roomStatus = roomManagementStatus[room.id];
                     const sickRoom = room.occupants.filter(name => sickPersons.includes(name));
                     const healthyRoom = room.occupants.filter(name => healthyPersons.includes(name));
                     
+                    // Fall 1: Gesunde und Kranke sind in einem Zimmer (Verletzung Regel A)
                     if (sickRoom.length > 0 && healthyRoom.length > 0) {
-                        // Der Fehler wird bereits durch Regel A in evaluateRooms blockiert, hier nur Viren-Ausbreitung, wenn ZUSAMMEN
                         healthyRoom.forEach(name => {
-                            if (Math.random() < 0.5) { // Hohe Ansteckung im selben Zimmer
+                            if (Math.random() < 0.6) { // Sehr hohe Ansteckung im selben Zimmer
                                 newlyInfected.push(name); 
                             }
                         });
-                    } else if (sickRoom.length > 0 && healthyRoom.length === 0) {
-                        // Viren-Ausbreitung, wenn Management-Regeln nicht beachtet werden, selbst wenn alle krank sind (Verletzung des Protokolls)
-                        const isVented = (currentTime - roomStatus.lastVentTime) < INFECTION_CHECK_INTERVAL;
-                        const isSafe = roomStatus.isDoorClosed && roomStatus.areMasksWorn && isVented;
-                        
-                        if (!isSafe && Math.random() < 0.3) {
-                             console.warn(`VIRUS-PROTOKOLL VERLETZT IN ZIMMER ${room.id}! Management-Regeln ignoriert.`);
-                        }
+                    } 
+                    
+                    // Fall 2: Flur-Übertragung
+                    const roomHasOpenDoor = !roomStatus.isDoorClosed;
+                    
+                    if (sickPersonsExist && healthyRoom.length > 0 && roomHasOpenDoor && openDoorsCount >= 2) {
+                         healthyRoom.forEach(name => {
+                            if (Math.random() < 0.4) { // Erhöhte Ansteckungsgefahr durch Flur-Luft
+                                newlyInfected.push(name); 
+                            }
+                        });
                     }
                 });
                 
@@ -658,24 +454,19 @@
                 if (newlyInfected.length > 0) renderRoomGame(); 
             }
             
-            // Aktualisiere Status-Anzeigen
-            renderConflictList();
             document.getElementById('sick-count').textContent = sickPersons.length;
             document.getElementById('sick-list').textContent = sickPersons.join(', ');
         }
         
         function startRoomTimer() {
-            // ... (unveränderte Logik)
             stopRoomTimer(); 
             roomStartTime = Date.now();
-            lastForgivenessTime = Date.now();
             lastInfectionCheckTime = Date.now();
             roomTimerInterval = setInterval(updateRoomState, 1000);
             updateRoomState(); 
         }
         
         function stopRoomTimer() {
-            // ... (unveränderte Logik)
             if (roomTimerInterval) {
                 clearInterval(roomTimerInterval);
                 roomTimerInterval = null;
@@ -683,24 +474,18 @@
         }
         
         function getUnassignedPersons() {
-            // ... (unveränderte Logik)
             const assignedPersons = rooms.flatMap(r => r.occupants);
             return PERSON_NAMES.filter(name => !assignedPersons.includes(name));
         }
 
         function setupRoomGame() {
-            // ... (unveränderte Logik)
             stopRoomTimer();
             generateRoomLayout();
             generateSickPersons();
-            taisMathProblem = generateTaisMathProblem(); // NEU: Generiere das neue Problem
+            selectInitialConflicts(); 
 
             rooms.forEach(room => room.occupants = []);
             roomProblemIds = [];
-            dynamicConflicts = [];
-            nextConflictIndex = 0;
-            roomManagementStatus = {};
-            isTaisMathSolved = false; // Tais-Status zurücksetzen
             
             rooms.forEach(room => {
                 roomManagementStatus[room.id] = {
@@ -710,7 +495,6 @@
                 };
             });
             
-            // Konflikt-Story-Box ausblenden
             document.getElementById('conflict-story-display').style.display = 'none';
 
             renderRoomGame();
@@ -719,11 +503,12 @@
         
         function renderConflictList() {
             const conflictListEl = document.getElementById('dynamic-conflicts-list');
+            document.getElementById('active-conflict-count').textContent = activeConflicts.length;
 
-            if (dynamicConflicts.length === 0) {
-                 conflictListEl.innerHTML = '<p class="text-xs italic text-indigo-600">Noch keine neuen Konflikte.</p>';
+            if (activeConflicts.length === 0) {
+                 conflictListEl.innerHTML = '<p class="text-xs italic text-indigo-600">Keine Konflikte in dieser Runde!</p>';
             } else {
-                conflictListEl.innerHTML = dynamicConflicts.map(([a, b, reason]) => 
+                conflictListEl.innerHTML = activeConflicts.map(([a, b, reason]) => 
                     `<span class="conflict-new" data-a="${a}" data-b="${b}" onclick="displayConflictStory('${a}', '${b}', '${reason.replace(/'/g, "\\'")}')">
                         ${a} &harr; ${b}
                     </span>`
@@ -732,10 +517,12 @@
         }
 
         function renderRoomGame() {
-            // ... (Logik zur Anzeige der Personen und Zimmer - unverändert, außer für Konflikt-Listener)
+            renderConflictList();
+
             const assignedPersons = rooms.flatMap(r => r.occupants);
             const unassignedNames = PERSON_NAMES.filter(name => !assignedPersons.includes(name));
             const totalCapacity = rooms.reduce((sum, room) => sum + room.size, 0);
+            const currentTime = Date.now();
 
             // Update Status Display
             document.getElementById('total-capacity').textContent = totalCapacity;
@@ -749,27 +536,15 @@
             const unassignedContainer = document.getElementById('unassigned-persons');
             unassignedContainer.innerHTML = unassignedNames.map(name => {
                 const isSick = sickPersons.includes(name);
-                const requiresHeating = NO_HEATING_TOLERANCE_PEOPLE.includes(name);
                 
                 let colorClass = isSick ? 'sick-person' : 'bg-indigo-500';
                 
-                let extraTag = '';
-                if (requiresHeating && !isSick) {
-                    extraTag = '🔥';
-                }
-                
-                // NEU: Kennzeichnung für Tais, wenn der Test nicht bestanden ist
-                if (name === 'Tais' && !isTaisMathSolved && !isSick) {
-                    extraTag = (extraTag ? extraTag + ' ' : '') + '🧠';
-                }
-
-
                 return `
                     <span id="person-${name}" 
                           draggable="true" 
                           data-name="${name}" 
                           class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${colorClass} shadow-sm transition hover:shadow-lg">
-                        ${name} ${isSick ? '🤒' : extraTag}
+                        ${name} ${isSick ? '🤒' : ''}
                     </span>
                 `;
             }).join('');
@@ -780,44 +555,49 @@
             
             rooms.forEach((room, index) => {
                 const status = roomManagementStatus[room.id];
+                const isTeacherRoom = room.isTeacherRoom;
                 const problemClass = roomProblemIds.includes(room.id) ? 'border-red-500 bg-red-50' : 'border-indigo-300 bg-white';
+                const roomExtraClass = isTeacherRoom ? 'lehrer-zimmer' : '';
+                const roomTitle = isTeacherRoom ? `Lehrerzimmer (Nothilfe)` : `Zimmer ${index + 1} (${room.size}er)`;
                 
                 const occupantsHTML = room.occupants.map(name => {
                     const isSick = sickPersons.includes(name);
-                    const requiresHeating = NO_HEATING_TOLERANCE_PEOPLE.includes(name);
                     
                     let colorClass = isSick ? 'sick-person' : 'bg-indigo-500';
-                    let extraTag = '';
-                    if (requiresHeating && !isSick) {
-                        extraTag = '🔥';
-                    }
 
                     return `
                         <span id="person-${name}" 
                               draggable="true" 
                               data-name="${name}" 
                               class="draggable-person px-3 py-1 text-xs font-semibold rounded-full text-white ${colorClass} shadow-sm transition hover:shadow-lg">
-                            ${name} ${isSick ? '🤒' : extraTag}
+                            ${name} ${isSick ? '🤒' : ''}
                         </span>
                     `;
                 }).join('');
 
-                const timeSinceVent = Math.floor((Date.now() - status.lastVentTime) / 1000);
-                const ventStatus = timeSinceVent <= 60 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                const timeSinceVent = Math.floor((currentTime - status.lastVentTime) / 1000);
+                const isVented = timeSinceVent <= 60;
+                const ventStatus = isVented ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
 
-                const heatingStatusIcon = room.hasHeating ? '🔥 Heizung: Ja' : '🧊 Heizung: Nein';
-                const heatingStatusClass = room.hasHeating ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700 font-bold'; 
+                // NEUE HEIZUNGSREGEL (optional für alle, aber 4 Personen brauchen sie nicht)
+                const requiresHeating = !['Adriana S.', 'Nila', 'Sean', 'Luc'].includes(...room.occupants);
+                const heatingIcon = room.hasHeating ? '🔥' : '🧊';
+                const heatingStatusText = room.hasHeating ? 'Heizung: Ja' : 'Heizung: Nein';
+                const heatingStatusClass = room.hasHeating ? 'bg-green-100 text-green-700' : (requiresHeating && room.occupants.length > 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700');
+
 
                 const roomHTML = `
                     <div id="${room.id}" 
                          data-room-id="${room.id}"
                          data-size="${room.size}"
-                         class="drop-zone room-card p-4 rounded-xl border-2 ${problemClass} space-y-3">
+                         class="drop-zone room-card p-4 rounded-xl border-2 ${problemClass} ${roomExtraClass} space-y-3">
                         
-                        <h4 class="w-full text-sm font-bold text-gray-700">Zimmer ${index + 1} (${room.size}er) - Belegt: ${room.occupants.length} / ${room.size}</h4>
+                        <h4 class="w-full text-sm font-bold text-gray-700">
+                           ${roomTitle} - Belegt: ${room.occupants.length} / ${room.size}
+                        </h4>
                         
                         <div class="p-2 rounded-lg text-xs font-semibold text-center ${heatingStatusClass}">
-                            ${heatingStatusIcon}
+                            ${heatingIcon} ${heatingStatusText}
                         </div>
 
 
@@ -887,59 +667,25 @@
                     const personName = e.dataTransfer.getData('text/plain');
                     const droppedOnRoomId = zone.id.startsWith('room-') ? zone.id : 'unassigned-persons';
                     
-                    // Allgemeine Kranke-Person-Regel: Kranke dürfen nicht in Zimmer
-                    const isPersonSick = sickPersons.includes(personName);
-                    
-                    if (isPersonSick && droppedOnRoomId !== 'unassigned-persons') {
-                        showMessage(`${personName} ist krank (🤒) und muss isoliert bleiben. Zimmerzuweisung verboten.`, true);
-                        renderRoomGame(); 
-                        return;
-                    }
-                    
-                    // --- TAIS-LOGIK-PRÜFUNG ---
-                    if (personName === 'Tais' && droppedOnRoomId !== 'unassigned-persons' && !isTaisMathSolved && !isPersonSick) {
-                        showTaisMathChallenge({ personName: personName, targetRoomId: droppedOnRoomId });
-                        return; 
-                    }
-
-                    // --- Normale Drop-Logik ---
-
-                    rooms.forEach(room => {
-                        const index = room.occupants.indexOf(personName);
-                        if (index > -1) {
-                            room.occupants.splice(index, 1);
-                        }
-                    });
-
-                    if (droppedOnRoomId !== 'unassigned-persons') {
-                        const targetRoom = rooms.find(r => r.id === droppedOnRoomId);
-                        if (targetRoom && targetRoom.occupants.length < targetRoom.size) {
-                            targetRoom.occupants.push(personName);
-                        } else if (targetRoom) {
-                             showMessage(`Zimmer ${targetRoom.id.replace('room-', '')} ist bereits voll (${targetRoom.size}er).`, true);
-                        }
-                    }
-
-                    renderRoomGame();
+                    // Führt die Zuweisung direkt aus, da keine Quests mehr blockieren
+                    assignPerson(personName, droppedOnRoomId);
                 });
             });
         }
 
         function evaluateRooms() {
-            // Timer stoppen, da die Bewertung beginnt
             stopRoomTimer();
-            updateRoomState(); // Finales Update vor der Bewertung
+            updateRoomState(); 
             
             roomProblemIds = [];
             const results = [];
             let allAssigned = true;
             let success = true;
             
-            const allConflicts = getAllConflictsWithReasons();
-            const currentTime = Date.now();
             let firstConflictReason = null; 
+            const currentTime = Date.now();
 
-            // 1. NEUE REGEL: Check, ob alle zugewiesen sind
+            // 1. Check, ob alle zugewiesen sind
             const unassignedCount = getUnassignedPersons().length;
             
             if (unassignedCount > 0) {
@@ -949,25 +695,32 @@
             }
             
             // 2. Allgemeine Zimmer-Regeln und Konflikte
+            let openDoorSickRoom = false; // Wird verwendet, um Regel C.2 zu prüfen
+            const openDoorsCount = rooms.filter(room => {
+                const status = roomManagementStatus[room.id];
+                return room.occupants.length > 0 && status.isDoorClosed === false;
+            }).length;
+            const sickUnassigned = getUnassignedPersons().filter(name => sickPersons.includes(name));
+
             rooms.forEach(room => {
                 let roomProblem = false;
                 let conflictPairsFound = [];
                 const occupants = room.occupants;
                 const status = roomManagementStatus[room.id];
                 
-                if (occupants.length === 0) return;
-                
-                // Regel D: Heizungsbedarf
-                if (!room.hasHeating) {
-                    occupants.forEach(name => {
-                        if (NO_HEATING_TOLERANCE_PEOPLE.includes(name)) {
-                            roomProblem = true;
-                            results.push(`❌ Zimmer ${room.id.replace('room-', '')}: ${name} MUSS in einem Zimmer mit Heizung (🔥) untergebracht werden.`);
-                            success = false;
-                        }
-                    });
+                if (occupants.length === 0) {
+                    if (!room.isTeacherRoom) {
+                         results.push(`⚠️ Zimmer ${room.id.replace('room-', '')} ist leer. Dies verschwendet Betten, aber ist kein sofortiger Fehler.`);
+                    }
+                    return;
                 }
                 
+                // Regel: Lehrerzimmer-Nutzung
+                if (room.isTeacherRoom && occupants.length > 0) {
+                    results.push(`⚠️ Zimmer ${room.id.replace('room-', '')}: Das Lehrerzimmer sollte nur in Notfällen belegt werden (grosse Abzüge).`);
+                    // Macht die Lösung nicht sofort ungültig, aber reduziert die Gesamtpunktzahl.
+                }
+
                 // Regel A: Krankheits-Isolation
                 const sickInRoom = occupants.filter(name => sickPersons.includes(name));
                 const healthyInRoom = occupants.length - sickInRoom.length;
@@ -978,26 +731,22 @@
                     success = false;
                 }
                 
-                // Regel B: Soziale Konflikte (Fixed UND Dynamic)
+                // Regel B: Soziale Konflikte
                 for (let i = 0; i < occupants.length; i++) {
                     for (let j = i + 1; j < occupants.length; j++) {
                         const personA = occupants[i];
                         const personB = occupants[j];
                         
-                        // Wenn einer der beiden krank ist, wird der Konflikt ignoriert
                         const isA_Sick = sickPersons.includes(personA);
                         const isB_Sick = sickPersons.includes(personB);
 
-                        if (isA_Sick || isB_Sick) {
-                            continue; 
-                        }
+                        if (isA_Sick || isB_Sick) continue; 
 
-                        if (isConflict(personA, personB, allConflicts)) {
+                        if (isConflict(personA, personB)) {
                             if (!roomProblem) roomProblem = true;
                             conflictPairsFound.push(`${personA} & ${personB}`);
                             success = false;
                             
-                            // Speichere den Grund des ERSTEN Konflikts für die Anzeige
                             if (!firstConflictReason) {
                                 firstConflictReason = {
                                     pair: `${personA} ↔️ ${personB}`,
@@ -1012,39 +761,58 @@
                     results.push(`❌ Zimmer ${room.id.replace('room-', '')}: Soziale Konflikte gefunden (${conflictPairsFound.join(', ')}).`);
                 }
                 
-                // Regel C: Zimmer-Management Check
+                // Regel C.1: Einzel-Management Check (Lüftung/Maske)
                 const isVented = (currentTime - status.lastVentTime) < INFECTION_CHECK_INTERVAL;
                 
                 if (sickInRoom.length > 0) {
-                    if (!status.isDoorClosed || !status.areMasksWorn || !isVented) {
-                        results.push(`⚠️ Zimmer ${room.id.replace('room-', '')}: Management MANGELHAFT (Tür: ${status.isDoorClosed ? '✅' : '❌'}, Maske: ${status.areMasksWorn ? '✅' : '❌'}, Lüftung: ${isVented ? '✅' : '❌'}).`);
-                        success = false; 
+                    if (!status.areMasksWorn || !isVented) {
+                        results.push(`⚠️ Zimmer ${room.id.replace('room-', '')}: Kranken-Management MANGELHAFT (Maske: ${status.areMasksWorn ? '✅' : '❌'}, Lüftung: ${isVented ? '✅' : '❌'}).`);
+                        // Keine Erfolgsreduzierung, da es ein Management-Problem ist
+                    }
+                    if (!status.isDoorClosed) {
+                         openDoorSickRoom = true; // Setze Flag für Flur-Überprüfung
                     }
                 }
+                
+                // Regel D: Heizung (NEUE REGEL)
+                const noHeatingRequired = ['Adriana S.', 'Nila', 'Sean', 'Luc'];
+                const occupantsNeedingHeating = occupants.filter(name => !noHeatingRequired.includes(name));
 
-                if (roomProblem || (sickInRoom.length > 0 && (!status.isDoorClosed || !status.areMasksWorn || !isVented))) {
+                if (!room.hasHeating && occupantsNeedingHeating.length > 0) {
+                    results.push(`⚠️ Zimmer ${room.id.replace('room-', '')}: Keine Heizung verfügbar. ${occupantsNeedingHeating.join(', ')} brauchen theoretisch eine.`);
+                }
+
+
+                if (roomProblem || (sickInRoom.length > 0 && (!status.areMasksWorn || !isVented))) {
                     if (!roomProblemIds.includes(room.id)) roomProblemIds.push(room.id);
                 }
             });
             
+            // Regel C.2: Flur-Übertragung (NEUE REGEL)
+            const sickPersonsExistInTotal = sickPersons.length > 0;
+            if (sickPersonsExistInTotal && openDoorsCount >= 2 && (openDoorSickRoom || sickUnassigned.length > 0)) {
+                 results.push(`❌ VIREN-RISIKO! Es sind Kranke in der Unterkunft UND ${openDoorsCount} Türen stehen offen. Virenübertragung im Flur möglich!`);
+                 success = false;
+            }
+
             // 3. Ausgabe des Ergebnisses
             const resultContainer = document.getElementById('room-results');
             const resultText = document.getElementById('room-result-text');
             const finalTime = document.getElementById('room-timer').textContent;
 
-            // Konflikt-Story-Anzeige aktualisieren
             if (firstConflictReason) {
                 displayConflictStory(firstConflictReason.pair.split(' ↔️ ')[0], firstConflictReason.pair.split(' ↔️ ')[1], firstConflictReason.reason);
             } else {
                 document.getElementById('conflict-story-display').style.display = 'none';
             }
 
-            if (success && allAssigned && roomProblemIds.length === 0 && sickPersons.length <= 5) { // Max 5 Kranke am Start
+            if (success && allAssigned && roomProblemIds.length === 0) { 
                 resultContainer.className = 'mt-6 p-4 border border-green-500 bg-green-100 rounded-xl';
-                resultText.innerHTML = `<span class="font-semibold text-lg">GROSSARTIG!</span> Die Zimmerordnung ist perfekt. Alle sind glücklich und gesund! Die Logistik dauerte nur: <span class="font-bold text-xl">${finalTime}</span>.`;
+                resultText.innerHTML = `<span class="font-semibold text-lg">PERFEKT!</span> Die Zimmerordnung ist perfekt. Alle sind glücklich und gesund! Die Logistik dauerte nur: <span class="font-bold text-xl">${finalTime}</span>.`;
+                stopRoomTimer();
             } else if (sickPersons.length > 10) {
                 resultContainer.className = 'mt-6 p-4 border border-red-500 bg-red-100 rounded-xl';
-                 resultText.innerHTML = `<span class="font-semibold text-lg">KATASROPHE!</span> Die Hälfte der Klasse ist krank geworden (${sickPersons.length} Personen). Die Logistik ist gescheitert.`;
+                 resultText.innerHTML = `<span class="font-semibold text-lg">KATASROPHE!</span> Über die Hälfte der Klasse ist krank geworden (${sickPersons.length} Personen). Die Logistik ist gescheitert.`;
                  stopRoomTimer();
             } else {
                 resultContainer.className = 'mt-6 p-4 border border-red-500 bg-red-100 rounded-xl';
@@ -1065,7 +833,8 @@
             
             resultContainer.style.display = 'block';
             renderRoomGame(); 
-            startRoomTimer(); // Timer läuft für weitere Versuche weiter, bis gestoppt wird
+            // Timer muss weiterlaufen, um Virenverbreitung zu simulieren
+            startRoomTimer();
         }
 
 
@@ -1078,13 +847,13 @@
             
             if (controlType === 'vent') {
                 roomManagementStatus[roomId].lastVentTime = Date.now();
-                showMessage(`Zimmer ${roomId.replace('room-', '')} gelüftet! Nächste Lüftung in 60s.`);
+                showMessage(`Zimmer ${roomId.replace('room-', '').replace('lehrer', 'Lehrer')} gelüftet! Nächste Lüftung in 60s.`);
             } else if (controlType === 'door') {
                 roomManagementStatus[roomId].isDoorClosed = value;
-                showMessage(`Zimmer ${roomId.replace('room-', '')}: Tür ist jetzt ${value ? 'geschlossen' : 'offen'}.`);
+                showMessage(`Zimmer ${roomId.replace('room-', '').replace('lehrer', 'Lehrer')}: Tür ist jetzt ${value ? 'geschlossen' : 'offen'}.`);
             } else if (controlType === 'mask') {
                 roomManagementStatus[roomId].areMasksWorn = value;
-                showMessage(`Zimmer ${roomId.replace('room-', '')}: Masken sind jetzt ${value ? 'aufgesetzt' : 'abgesetzt'}.`);
+                showMessage(`Zimmer ${roomId.replace('room-', '').replace('lehrer', 'Lehrer')}: Masken sind jetzt ${value ? 'aufgesetzt' : 'abgesetzt'}.`);
             }
             renderRoomGame(); 
         }
